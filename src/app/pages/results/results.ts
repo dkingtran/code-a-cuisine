@@ -53,10 +53,12 @@ export class ResultsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.themeService.setBackground('#396039');
+    this.themeService.setLogoVariant('beige');
   }
 
   ngOnDestroy(): void {
     this.themeService.clearBackground();
+    this.themeService.setLogoVariant('green');
   }
 
   recipes = signal<Recipe[]>([

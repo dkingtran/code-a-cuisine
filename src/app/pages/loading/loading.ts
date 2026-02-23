@@ -16,6 +16,7 @@ export class LoadingComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.themeService.setBackground('#396039');
+    this.themeService.setLogoVariant('beige');
     // Simulate API call duration
     setTimeout(() => {
       this.router.navigate(['/results']);
@@ -24,5 +25,6 @@ export class LoadingComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.themeService.clearBackground();
+    this.themeService.setLogoVariant('green');
   }
 }

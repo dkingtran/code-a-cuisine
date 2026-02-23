@@ -1,3 +1,109 @@
 :host {
     display: block;
+    overflow: visible;
+}
+
+.main-content {
+    position: relative;
+    padding: 0 clamp(16px, 5vw, 68px);
+    min-height: 100vh;
+}
+
+.hero-title {
+    color: #F5F5DC;
+    position: absolute;
+    top: 20%;
+
+    h2 {
+        font-size: clamp(1.5rem, 3vw, 3rem);
+    }
+
+    h1 {
+        font-size: clamp(4rem, 6vw, 6.5rem);
+        font-weight: 700;
+        font-family: 'ubuntu', sans-serif;
+    }
+
+    button {
+        margin-top: 4rem;
+        cursor: pointer;
+    }
+}
+
+.hero-images {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: max(0px, calc(50vw - 960px));
+    right: max(0px, calc(50vw - 960px));
+    pointer-events: none;
+
+    img {
+        position: absolute;
+        right: 0;
+        width: clamp(200px, 38vh, 700px);
+        height: auto;
+
+        // ellipse-3 → bottom edge
+        &:nth-child(1) {
+            bottom: 0;
+        }
+
+        // ellipse-2 → vertical center
+        &:nth-child(2) {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        // ellipse-1 → top edge
+        &:nth-child(3) {
+            top: 0;
+        }
+    }
+}
+
+.primary-btn-creme {
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
+}
+
+.bottom-text {
+    position: absolute;
+    bottom: 20%;
+
+    p {
+        color: #FAF0E6;
+        font-size: clamp(1.5rem, 2.5vw, 2rem);
+        font-weight: 500;
+        font-family: 'ubuntu', sans-serif;
+
+        @media (max-width: 600px) {
+            padding: 0 26px;
+        }
+    }
+
+    button {
+        padding: 16px 26px;
+        border: none;
+        gap: 10px;
+        color: #FAF0E6;
+        font-family: 'quicksand', sans-serif;
+        font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+        flex-direction: column;
+        align-items: start;
+        bottom: 10%;
+    }
+}
+
+.bottom-btn {
+    background-color: transparent;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #517751;
+    }
 }

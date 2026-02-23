@@ -1,3 +1,26 @@
-<p>
-    Welcome to Code a Cuisine! Your personal recipe generator. Click the button below to start creating delicious recipes tailored to your preferences.
-</p>
+
+<div class="main-content">
+    <div class="hero-title">
+        <h2>
+            AI-Powered recipe generator
+        </h2>
+        <h1>
+            Code à Cuisine
+        </h1>
+        <button class="primary-btn-creme" routerLink="/generate">
+            Get started
+        </button>
+    </div>
+    <div class="hero-images">
+        @for (image of heroImages(); track image.src) {
+            <img [src]="image.src" [style.z-index]="image.zIndex" alt="Hero ellipse">
+        }
+    </div>
+    <div class="bottom-text display-row gap-16 display-center-center">
+        <p>Hungry for inspiration?</p>
+        <button class="bottom-btn display-center-center" routerLink="/cookbook">
+            Go to cookbook 
+            <img src="/assets/img/hero/icon/arrow.png" alt="cookbook arrow">
+        </button>
+    </div>
+</div>
