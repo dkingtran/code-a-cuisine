@@ -1,0 +1,22 @@
+.loading-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.loading-gif {
+    width: 100px;
+    height: 100px;
+}
+
+p {
+    margin-top: 1rem;
+    font-size: 1.2rem;
+    color: #333;
+}
