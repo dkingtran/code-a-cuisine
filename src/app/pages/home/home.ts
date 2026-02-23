@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-home',
@@ -6,6 +7,14 @@ import { Component } from '@angular/core';
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit, OnDestroy {
+  private readonly themeService = inject(ThemeService);
 
+  ngOnInit(): void {
+    this.themeService.setBackground('#396039');
+  }
+
+  ngOnDestroy(): void {
+    this.themeService.clearBackground();
+  }
 }

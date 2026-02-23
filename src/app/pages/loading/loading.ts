@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-loading',
@@ -9,13 +10,19 @@ import { Router } from '@angular/router';
   styleUrl: './loading.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoadingComponent implements OnInit {
-  constructor(private router: Router) { }
+export class LoadingComponent implements OnInit, OnDestroy {
+  private readonly router = inject(Router);
+  private readonly themeService = inject(ThemeService);
 
-  ngOnInit() {
+  ngOnInit(): void {
+    this.themeService.setBackground('#396039');
     // Simulate API call duration
     setTimeout(() => {
       this.router.navigate(['/results']);
     }, 3000); // 3 seconds
+  }
+
+  ngOnDestroy(): void {
+    this.themeService.clearBackground();
   }
 }

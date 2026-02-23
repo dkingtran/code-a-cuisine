@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Recipe } from '../../shared/models/recipe.model';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-results',
@@ -47,7 +48,17 @@ import { Recipe } from '../../shared/models/recipe.model';
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ResultsComponent {
+export class ResultsComponent implements OnInit, OnDestroy {
+  private readonly themeService = inject(ThemeService);
+
+  ngOnInit(): void {
+    this.themeService.setBackground('#396039');
+  }
+
+  ngOnDestroy(): void {
+    this.themeService.clearBackground();
+  }
+
   recipes = signal<Recipe[]>([
     { id: '1', title: 'Spaghetti Carbonara', description: 'Classic Italian pasta', ingredients: [], instructions: [], cuisine: 'italian' },
     { id: '2', title: 'Schnitzel', description: 'German breaded cutlet', ingredients: [], instructions: [], cuisine: 'german' }
