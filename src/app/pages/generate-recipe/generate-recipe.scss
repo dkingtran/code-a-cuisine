@@ -23,6 +23,11 @@
 .first-container {
     @include green-container;
     flex: 1 1 400px;
+    transition: padding-bottom 0.15s ease;
+
+    &.dropdown-open {
+        padding-bottom: calc(clamp(16px, 2.5vw, 25px) + 108px);
+    }
 
     p {
         @include font-color-green;
@@ -32,6 +37,11 @@
 
 .ingredient-inputs {
     flex-wrap: wrap;
+
+    @media (max-width: 500px) {
+        flex-direction: column;
+        gap: 12px;
+    }
 }
 
 .ingredient-container {
@@ -46,6 +56,51 @@
 
     &:last-child {
         flex: 0 0 auto;
+    }
+}
+
+// ── Ingredient autocomplete ──────────────────────────────────────────────────
+
+.suggestions-wrapper {
+    position: relative;
+
+    input {
+        width: 100%;
+    }
+}
+
+.suggestions-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+}
+
+.suggestions-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 11;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    list-style: none;
+    min-width: 100%;
+    overflow: hidden;
+
+    li {
+        padding: 4px 8px;
+        cursor: pointer;
+        font-family: 'quicksand', sans-serif;
+        color: #10310B;
+        background-color: transparent;
+        border-radius: 8px;
+        font-size: 0.9375rem;
+        transition: background-color 0.1s ease;
+        white-space: nowrap;
+
+        &:hover {
+            background-color: #FAF0E6CC;
+        }
     }
 }
 
@@ -77,7 +132,9 @@
 .unit-toggle {
     @include input-creme;
     display: flex;
+    justify-content: center;
     align-items: center;
+    width: 84px;
     gap: 6px;
     cursor: pointer;
     white-space: nowrap;
@@ -106,26 +163,22 @@
     left: 0;
     z-index: 11;
     list-style: none;
-    background: #FAF0E6;
-    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     min-width: 100%;
 
     li {
-        padding: 8px 16px;
+        padding: 4px 8px;
         cursor: pointer;
         font-family: 'quicksand', sans-serif;
         color: #10310B;
-        transition: background-color 0.12s ease;
+        transition: all 0.125s ease;
 
         &:hover {
-            background-color: #e8ddd0;
+            transform: scale(1.05);
         }
 
         &.selected {
             font-weight: 700;
-            background-color: #d9cfc5;
         }
     }
 }
@@ -139,6 +192,9 @@
     cursor: pointer;
     flex-shrink: 0;
     line-height: 0;
+    border-radius: 5px;
+    padding: 10px;
+    transition: all 0.125s ease;
 
     img {
         width: 18px;
@@ -146,7 +202,20 @@
     }
 
     &:hover {
-        opacity: 0.8;
+        background-color: #FAF0E6;
+        color: #396039;
+
+        img {
+            filter: invert(24%) sepia(64%) saturate(1100%) hue-rotate(86deg) brightness(93%) contrast(95%);
+        }
+    }
+
+    &:active {
+        background: transparent;
+
+        img {
+            filter: invert(32%) sepia(90%) saturate(600%) hue-rotate(90deg) brightness(90%) contrast(120%);
+        }
     }
 }
 

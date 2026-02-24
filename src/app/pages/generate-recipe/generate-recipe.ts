@@ -1,4 +1,5 @@
-import { Component, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 interface Ingredient {
   id: number;
@@ -15,6 +16,10 @@ interface Ingredient {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GenerateRecipeComponent {
+  private readonly http = inject(HttpClient);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
   readonly units = ['gram', 'ml', 'piece'] as const;
 
   ingredientName = signal('');
@@ -22,6 +27,8 @@ export class GenerateRecipeComponent {
   selectedUnit = signal<'gram' | 'ml' | 'piece'>('gram');
   dropdownOpen = signal(false);
   ingredients = signal<Ingredient[]>([]);
+  suggestions = signal<string[]>([]);
+  suggestionsOpen = signal(false);
   hasIngredientName = computed(() => this.ingredientName().trim().length > 0);
 
   private nextId = 0;
@@ -57,6 +64,8 @@ export class GenerateRecipeComponent {
 
     this.ingredientName.set('');
     this.servingAmount.set('');
+    this.suggestions.set([]);
+    this.suggestionsOpen.set(false);
   }
 
   removeIngredient(id: number): void {
@@ -68,5 +77,56 @@ export class GenerateRecipeComponent {
     this.servingAmount.set(ingredient.amount);
     this.selectedUnit.set(ingredient.unit);
     this.removeIngredient(ingredient.id);
+  }
+
+  onIngredientNameInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const filtered = input.value.replace(/[^a-zA-ZäöüÄÖÜß\s]/g, '');
+    input.value = filtered;
+    this.ingredientName.set(filtered);
+
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+
+    const term = filtered.trim();
+    if (term.length < 2) {
+      this.suggestions.set([]);
+      this.suggestionsOpen.set(false);
+      return;
+    }
+
+    this.debounceTimer = setTimeout(() => {
+      this.http
+        .get<string[]>(`https://world.openfoodfacts.org/cgi/suggest.pl`, {
+          params: { term, tagtype: 'ingredients' },
+        })
+        .subscribe({
+          next: (results) => {
+            this.suggestions.set(results.slice(0, 3));
+            this.suggestionsOpen.set(results.length > 0);
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.suggestions.set([]);
+            this.suggestionsOpen.set(false);
+          },
+        });
+    }, 300);
+  }
+
+  selectSuggestion(name: string): void {
+    this.ingredientName.set(name);
+    this.suggestions.set([]);
+    this.suggestionsOpen.set(false);
+  }
+
+  closeSuggestions(): void {
+    this.suggestionsOpen.set(false);
+  }
+
+  onServingAmountInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const filtered = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+    input.value = filtered;
+    this.servingAmount.set(filtered);
   }
 }

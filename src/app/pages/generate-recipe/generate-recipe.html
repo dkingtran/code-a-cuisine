@@ -4,16 +4,29 @@
         <p>Got random stuff in your kitchen? Pop it in—we've got the perfect recipe waiting.</p>
     </div>
     <div class="ingredient-content display-row gap-32">
-        <div class="first-container display-column gap-24">
+        <div class="first-container display-column gap-24" [class.dropdown-open]="dropdownOpen() || suggestionsOpen()">
             <div class="ingredient-inputs display-row gap-32">
                 <div class="ingredient-container display-column gap-8">
                     <p>Ingredient</p>
-                    <input
-                        type="text"
-                        placeholder="Pasta"
-                        [value]="ingredientName()"
-                        (input)="ingredientName.set($any($event.target).value)"
-                    >
+                    <div class="suggestions-wrapper">
+                        <input
+                            type="text"
+                            placeholder="Pasta"
+                            [value]="ingredientName()"
+                            (input)="onIngredientNameInput($event)"
+                        >
+                        @if (suggestionsOpen()) {
+                            <div class="suggestions-backdrop" (click)="closeSuggestions()"></div>
+                            <ul class="suggestions-list" role="listbox" aria-label="Ingredient suggestions">
+                                @for (suggestion of suggestions(); track suggestion) {
+                                    <li
+                                        role="option"
+                                        (click)="selectSuggestion(suggestion)"
+                                    >{{ suggestion }}</li>
+                                }
+                            </ul>
+                        }
+                    </div>
                 </div>
                 <div class="ingredient-container display-column gap-8">
                     <p>Serving Size</p>
@@ -23,7 +36,7 @@
                             placeholder="100"
                             [class.placeholder-dimmed]="!hasIngredientName()"
                             [value]="servingAmount()"
-                            (input)="servingAmount.set($any($event.target).value)"
+                            (input)="onServingAmountInput($event)"
                         >
                         <div class="unit-dropdown">
                             <button
