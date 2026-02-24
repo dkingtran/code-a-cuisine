@@ -21,6 +21,30 @@ body {
     font-size: 16px;
 }
 
+@mixin font-color-green {
+    color: #1E5515;
+}
+
+@mixin input-creme {
+    background: #FAF0E6CC;
+    border-radius: 20px;
+    border: none;
+    padding: 8px 12px;
+    font-family: 'quicksand', sans-serif;
+    font-size: 1rem;
+    color: #10310B;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+@mixin green-container {
+    background-color: #3960394D;
+    padding: clamp(16px, 2.5vw, 25px) clamp(24px, 3vw, 32px);
+    border-radius: 20px;
+}
+
 .primary-btn-green {
     font-weight: 600;
     font-family: 'quicksand', sans-serif;
@@ -124,10 +148,22 @@ body {
     align-items: flex-end;
 }
 
+.gap-8 {
+    gap: 8px;
+}
+
 .gap-16 {
     gap: 16px;
 }
 
+.gap-24 {
+    gap: 24px;
+}
+
 .gap-32 {
     gap: 32px;
+}
+
+.main-content {
+    padding: 0 clamp(1rem, 5vw, 4.25rem);
 }

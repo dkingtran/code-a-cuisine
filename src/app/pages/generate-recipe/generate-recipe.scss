@@ -1,0 +1,232 @@
+@import '../../../styles.scss';
+
+.header {
+    gap: 24px;
+    margin-bottom: 2.5rem;
+
+    h1 {
+        font-size: clamp(2rem, 4vw, 3.38rem);
+        @include font-color-green;
+    }
+
+    p {
+        font-size: clamp(1.125rem, 2vw, 1.5rem);
+        @include font-color-green;
+    }
+}
+
+.ingredient-content {
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.first-container {
+    @include green-container;
+    flex: 1 1 400px;
+
+    p {
+        @include font-color-green;
+        font-weight: 600;
+    }
+}
+
+.ingredient-inputs {
+    flex-wrap: wrap;
+}
+
+.ingredient-container {
+    input {
+        @include input-creme;
+        width: 100%;
+    }
+
+    &:first-child {
+        flex: 1;
+    }
+
+    &:last-child {
+        flex: 0 0 auto;
+    }
+}
+
+.serving-size-row {
+    flex-wrap: nowrap;
+
+    input {
+        width: 3.8125rem;
+        flex-shrink: 0;
+        text-align: center;
+
+        &::placeholder {
+            color: #10310B;
+        }
+
+        &.placeholder-dimmed::placeholder {
+            color: #10310B4D;
+        }
+    }
+}
+
+// ── Custom dropdown ──────────────────────────────────────────────────────────
+
+.unit-dropdown {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.unit-toggle {
+    @include input-creme;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+
+    .arrow {
+        display: inline-block;
+        transition: transform 0.15s ease;
+        line-height: 1;
+
+        &.open {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+.dropdown-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+}
+
+.dropdown-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 11;
+    list-style: none;
+    background: #FAF0E6;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    min-width: 100%;
+
+    li {
+        padding: 8px 16px;
+        cursor: pointer;
+        font-family: 'quicksand', sans-serif;
+        color: #10310B;
+        transition: background-color 0.12s ease;
+
+        &:hover {
+            background-color: #e8ddd0;
+        }
+
+        &.selected {
+            font-weight: 700;
+            background-color: #d9cfc5;
+        }
+    }
+}
+
+// ── Add button ───────────────────────────────────────────────────────────────
+
+.add-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 0;
+
+    img {
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+// ── Ingredient list (second container) ───────────────────────────────────────
+
+.second-container {
+    @include green-container;
+    flex: 1 1 300px;
+}
+
+.list-title {
+    @include font-color-green;
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.ingredient-list {
+    list-style: none;
+}
+
+.ingredient-item {
+    background-color: #FAF0E6CC;
+    border-radius: 12px;
+    padding: 10px 14px;
+
+    .item-amount {
+        font-weight: 700;
+        color: #1E5515;
+        white-space: nowrap;
+        min-width: 3.5rem;
+    }
+
+    .item-name {
+        flex: 1;
+        color: #10310B;
+        font-weight: 500;
+    }
+
+    .item-actions {
+        flex-shrink: 0;
+    }
+}
+
+.icon-btn {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s ease;
+
+    svg {
+        display: block;
+    }
+}
+
+.edit-btn {
+    color: #396039;
+
+    &:hover {
+        background-color: #39603922;
+    }
+}
+
+.delete-btn {
+    color: #8b2222;
+
+    &:hover {
+        background-color: #8b222222;
+    }
+}
+
+.empty-state {
+    list-style: none;
+    color: #1E5515;
+    opacity: 0.6;
+    font-style: italic;
+    font-size: 0.95rem;
+    padding: 8px 0;
+}
