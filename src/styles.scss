@@ -21,6 +21,10 @@ body {
     font-size: 16px;
 }
 
+a {
+    text-decoration: none;
+}
+
 @mixin font-color-green {
     color: #1E5515;
 }
@@ -161,6 +165,34 @@ body {
 
     @media (max-width: 400px) {
         padding: 12px 20px;
+    }
+}
+
+.action-back-btn {
+    @include flex-layout(row, center, center);
+    gap: 10px;
+    width: fit-content;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: transparent;
+    color: #1E5515;
+    text-decoration: none;
+    font-family: 'quicksand', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.125s ease;
+
+    &:hover {
+        transform: scale(1.02);
+    }
+
+    img,
+    svg {
+        width: 22px;
+        height: 15px;
+        display: block;
+        flex-shrink: 0;
     }
 }
 

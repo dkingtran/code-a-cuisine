@@ -3,19 +3,17 @@
 }
 
 h1 {
+    color: #10310B;
     font-size: clamp(1.4rem, 3.5vw, 2rem);
     margin-bottom: 1rem;
 }
 
 .btn {
-    display: inline-block;
-    padding: 1rem 2rem;
-    background: #28a745;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    margin-top: 1rem;
+    width: fit-content;
+    margin-top: 3rem;
+    margin-inline: auto;
 }
+
 
 form {
     margin: 1rem 0;
