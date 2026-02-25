@@ -1,5 +1,7 @@
-import { Component, signal, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, signal, computed, effect, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
+import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 
 interface Ingredient {
   id: number;
@@ -10,7 +12,7 @@ interface Ingredient {
 
 @Component({
   selector: 'app-generate-recipe',
-  imports: [],
+  imports: [SvgIconComponent],
   templateUrl: './generate-recipe.html',
   styleUrl: './generate-recipe.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +20,9 @@ interface Ingredient {
 export class GenerateRecipeComponent {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
+  private nextId = 0;
+
+  private readonly STORAGE_KEY = 'cac_ingredients';
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly units = ['gram', 'ml', 'piece'] as const;
@@ -26,12 +31,33 @@ export class GenerateRecipeComponent {
   servingAmount = signal('');
   selectedUnit = signal<'gram' | 'ml' | 'piece'>('gram');
   dropdownOpen = signal(false);
-  ingredients = signal<Ingredient[]>([]);
+  ingredients = signal<Ingredient[]>(this.loadFromStorage());
   suggestions = signal<string[]>([]);
   suggestionsOpen = signal(false);
-  hasIngredientName = computed(() => this.ingredientName().trim().length > 0);
 
-  private nextId = 0;
+  constructor() {
+    effect(() => {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.ingredients()));
+    });
+  }
+
+  private loadFromStorage(): Ingredient[] {
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      const list: Ingredient[] = raw ? JSON.parse(raw) : [];
+      this.nextId = list.length > 0 ? Math.max(...list.map(i => i.id)) + 1 : 0;
+      return list;
+    } catch {
+      return [];
+    }
+  }
+
+  readonly containerPaddingBottom = computed(() => {
+    const base = 'clamp(16px, 2.5vw, 25px)';
+    if (this.dropdownOpen()) return `calc(${base} + 108px)`;
+    if (this.suggestionsOpen()) return `calc(${base} + ${this.suggestions().length * 36}px)`;
+    return null;
+  });
 
   unitLabel(unit: 'gram' | 'ml' | 'piece'): string {
     if (unit === 'gram') return 'g';
@@ -95,21 +121,24 @@ export class GenerateRecipeComponent {
     }
 
     this.debounceTimer = setTimeout(() => {
-      this.http
-        .get<string[]>(`https://world.openfoodfacts.org/cgi/suggest.pl`, {
-          params: { term, tagtype: 'ingredients' },
-        })
-        .subscribe({
-          next: (results) => {
-            this.suggestions.set(results.slice(0, 3));
-            this.suggestionsOpen.set(results.length > 0);
-            this.cdr.markForCheck();
-          },
-          error: () => {
-            this.suggestions.set([]);
-            this.suggestionsOpen.set(false);
-          },
-        });
+      const params = { term, tagtype: 'ingredients' };
+      forkJoin([
+        this.http.get<string[]>('https://world.openfoodfacts.org/cgi/suggest.pl', { params }),
+        this.http.get<string[]>('https://de.openfoodfacts.org/cgi/suggest.pl', { params }),
+      ]).subscribe({
+        next: ([en, de]) => {
+          const lower = term.toLowerCase();
+          const merged = [...new Set([...en, ...de])]
+            .filter(r => r.toLowerCase().startsWith(lower));
+          this.suggestions.set(merged.slice(0, 5));
+          this.suggestionsOpen.set(merged.length > 0);
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.suggestions.set([]);
+          this.suggestionsOpen.set(false);
+        },
+      });
     }, 300);
   }
 

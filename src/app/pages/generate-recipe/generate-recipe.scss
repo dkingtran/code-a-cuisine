@@ -25,10 +25,6 @@
     flex: 1 1 400px;
     transition: padding-bottom 0.15s ease;
 
-    &.dropdown-open {
-        padding-bottom: calc(clamp(16px, 2.5vw, 25px) + 108px);
-    }
-
     p {
         @include font-color-green;
         font-weight: 600;
@@ -113,11 +109,12 @@
         text-align: center;
 
         &::placeholder {
-            color: #10310B;
+            color: #10310B4D;
+            transition: opacity 0.1s ease;
         }
 
-        &.placeholder-dimmed::placeholder {
-            color: #10310B4D;
+        &:focus::placeholder {
+            opacity: 0;
         }
     }
 }
@@ -237,7 +234,7 @@
 }
 
 .ingredient-item {
-    background-color: #FAF0E6CC;
+    background-color: transparent;
     border-radius: 12px;
     padding: 10px 14px;
 
@@ -277,6 +274,8 @@
 
 .edit-btn {
     color: #396039;
+    width: 32px;
+    height: 32px;
 
     &:hover {
         background-color: #39603922;
@@ -285,6 +284,8 @@
 
 .delete-btn {
     color: #8b2222;
+    width: 32px;
+    height: 32px;
 
     &:hover {
         background-color: #8b222222;
