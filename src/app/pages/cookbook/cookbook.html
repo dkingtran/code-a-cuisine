@@ -1,1 +1,14 @@
-<p>cookbook works!</p>
+<div class="main-content">
+
+<h2>Cookbook</h2>
+@for (cuisine of cuisines(); track cuisine.type) {
+  <div class="cuisine-card">
+    <img [src]="cuisine.imageUrl" [alt]="cuisine.name">
+    <h3>{{ cuisine.name }}</h3>
+    <button type="button" class="btn" (click)="openCuisine(cuisine.type)">View Recipes</button>
+  </div>
+}
+
+<button type="button" class="generate-btn" (click)="goToGenerate()">Generate New Recipe</button>
+
+</div>

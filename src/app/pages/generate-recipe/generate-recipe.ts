@@ -1,5 +1,6 @@
 import { Component, signal, computed, effect, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 
@@ -20,12 +21,14 @@ interface Ingredient {
 export class GenerateRecipeComponent {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly router = inject(Router);
   private nextId = 0;
 
   private readonly STORAGE_KEY = 'cac_ingredients';
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly units = ['gram', 'ml', 'piece'] as const;
+  readonly itemBullet = '•';
 
   ingredientName = signal('');
   servingAmount = signal('');
@@ -157,5 +160,9 @@ export class GenerateRecipeComponent {
     const filtered = input.value.replace(/[^0-9]/g, '').slice(0, 4);
     input.value = filtered;
     this.servingAmount.set(filtered);
+  }
+
+  goToPreferences(): void {
+    void this.router.navigate(['/preferences']);
   }
 }

@@ -1,12 +1,12 @@
 ﻿<div class="main-content">
-    <div class="header display-column display-center-center">
+    <div class="header">
         <h1>Generate recipe</h1>
         <p>Got random stuff in your kitchen? Pop it in—we've got the perfect recipe waiting.</p>
     </div>
-    <div class="ingredient-content display-row gap-32">
-        <div class="first-container display-column gap-24" [style.padding-bottom]="containerPaddingBottom()">
-            <div class="ingredient-inputs display-row gap-32">
-                <div class="ingredient-container display-column gap-8">
+    <div class="ingredient-content">
+        <div class="first-container" [style.padding-bottom]="containerPaddingBottom()">
+            <div class="ingredient-inputs">
+                <div class="ingredient-container">
                     <p>Ingredient</p>
                     <div class="suggestions-wrapper">
                         <input
@@ -28,9 +28,9 @@
                         }
                     </div>
                 </div>
-                <div class="ingredient-container display-column gap-8">
+                <div class="ingredient-container">
                     <p>Serving Size</p>
-                    <div class="serving-size-row display-row display-ai-center gap-8">
+                    <div class="serving-size-row">
                         <input
                             type="text"
                             placeholder="100"
@@ -75,21 +75,24 @@
             </div>
         </div>
 
-        <div class="second-container display-column gap-16">
+        <div class="second-container">
             <p class="list-title">List of your Ingredients</p>
-            <ul class="ingredient-list display-column gap-8">
+            <ul class="ingredient-list">
                 @for (item of ingredients(); track item.id) {
-                    <li class="ingredient-item display-row display-ai-center gap-16">
-                        <span class="item-amount">{{ item.amount }}{{ unitLabel(item.unit) }}</span>
+                    <li class="ingredient-item">
+                        <span class="item-prefix">
+                            <span class="item-bullet" aria-hidden="true">{{ itemBullet }}</span>
+                            <span class="item-amount">{{ item.amount }}{{ unitLabel(item.unit) }}</span>
+                        </span>
                         <span class="item-name">{{ item.name }}</span>
-                        <div class="item-actions display-row gap-8">
+                        <div class="item-actions">
                             <button
                                 type="button"
                                 class="icon-btn edit-btn"
                                 (click)="editIngredient(item)"
                                 [attr.aria-label]="'Edit ' + item.name"
                             >
-                                <app-svg-icon name="edit" [size]="24" />
+                                <app-svg-icon name="edit" [size]="'100%'" />
                             </button>
                             <button
                                 type="button"
@@ -97,7 +100,7 @@
                                 (click)="removeIngredient(item.id)"
                                 [attr.aria-label]="'Remove ' + item.name"
                             >
-                                <app-svg-icon name="trash" [size]="20" />
+                                <app-svg-icon name="trash" [size]="'100%'" />
                             </button>
                         </div>
                     </li>
@@ -107,4 +110,15 @@
             </ul>
         </div>
     </div>
+    @if (ingredients().length > 0) {
+        <div class="next-step-button">
+            <button
+                class="primary-btn-green"
+                type="button"
+                (click)="goToPreferences()"
+            >
+                Next step
+            </button>
+        </div>
+    }
 </div>

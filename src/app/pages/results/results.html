@@ -1,1 +1,15 @@
-<p>results works!</p>
+<div class="main-content">
+  <h2>Results</h2>
+  @for (recipe of recipes(); track recipe.id) {
+    <div class="recipe-card">
+      <h3>{{ recipe.title }}</h3>
+      <p>{{ recipe.description }}</p>
+      <button type="button" class="btn" (click)="openRecipe(recipe.id)">View</button>
+    </div>
+  }
+
+  <button type="button" class="generate-btn action-arrow-btn" (click)="goToGenerate()">
+    Generate New Recipe
+    <app-svg-icon name="forward-btn-creme" [width]="26" [height]="15" />
+  </button>
+</div>

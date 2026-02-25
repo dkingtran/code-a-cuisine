@@ -1,10 +1,11 @@
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
+import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, SvgIconComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

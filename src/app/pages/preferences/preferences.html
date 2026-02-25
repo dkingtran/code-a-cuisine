@@ -1,14 +1,25 @@
-<h2>Step 2: Preferences</h2>
-<p>Select your preferences for the recipe.</p>
-<!-- Hier kannst du später ein Formular hinzufügen -->
-<form>
-  <label for="cuisine">Cuisine:</label>
-  <select id="cuisine">
-    <option value="italian">Italian</option>
-    <option value="german">German</option>
-  </select>
-  <br>
-  <label for="ingredients">Ingredients:</label>
-  <input type="text" id="ingredients" placeholder="e.g. pasta, tomato">
-</form>
-<a routerLink="/loading" class="btn">Generate Recipe</a>
+
+<div class="main-content">
+  <div class="back-btn">
+    <a routerLink="/ingredients">
+      <svg width="22" height="15" viewBox="0 0 22 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M21 8.36401C21.5523 8.36401 22 7.9163 22 7.36401C22 6.81173 21.5523 6.36401 21 6.36401L21 8.36401ZM0.292893 6.65691C-0.0976314 7.04743 -0.0976315 7.68059 0.292892 8.07112L6.65685 14.4351C7.04738 14.8256 7.68054 14.8256 8.07107 14.4351C8.46159 14.0446 8.46159 13.4114 8.07107 13.0209L2.41421 7.36401L8.07107 1.70716C8.46159 1.31663 8.46159 0.683469 8.07107 0.292945C7.68054 -0.0975797 7.04738 -0.0975797 6.65686 0.292945L0.292893 6.65691ZM21 7.36401L21 6.36401L1 6.36401L1 7.36401L1 8.36401L21 8.36401L21 7.36401Z" fill="#1E5515"/>
+      </svg>
+    </a>
+  </div>
+  <h1 class="display-center-center">Choose your preferences</h1>
+
+  <p>Select your preferences for the recipe.</p>
+  <!-- Hier kannst du später ein Formular hinzufügen -->
+  <form>
+    <label for="cuisine">Cuisine:</label>
+    <select id="cuisine">
+      <option value="italian">Italian</option>
+      <option value="german">German</option>
+    </select>
+    <br>
+    <label for="ingredients">Ingredients:</label>
+    <input type="text" id="ingredients" placeholder="e.g. pasta, tomato">
+  </form>
+  <a routerLink="/loading" class="btn">Generate Recipe</a>
+</div>

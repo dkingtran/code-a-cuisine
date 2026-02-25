@@ -1,3 +1,5 @@
+@import '../../../styles.scss';
+
 :host {
     display: flex;
     flex-direction: column;
@@ -136,6 +138,8 @@
 }
 
 .bottom-text {
+    @include flex-layout(row, center, center);
+    gap: 16px;
     position: absolute;
     bottom: 20%;
 
@@ -154,21 +158,6 @@
         }
     }
 
-    button {
-        padding: 16px 26px;
-        border: none;
-        gap: 10px;
-        color: #FAF0E6;
-        font-family: 'quicksand', sans-serif;
-        font-size: clamp(1.125rem, 1.5vw, 1.25rem);
-        font-weight: 500;
-        cursor: pointer;
-
-        @media (max-width: 400px) {
-            padding: 12px 20px;
-        }
-    }
-
     @media (max-width: 800px) {
         flex-direction: column;
         align-items: start;
@@ -181,10 +170,5 @@
 }
 
 .bottom-btn {
-    background-color: transparent;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-        background-color: #517751;
-    }
+    @include flex-layout(row, center, center);
 }

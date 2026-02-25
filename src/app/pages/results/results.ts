@@ -1,55 +1,20 @@
 import { Component, ChangeDetectionStrategy, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Recipe } from '../../shared/models/recipe.model';
 import { ThemeService } from '../../core/services/theme.service';
+import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 
 @Component({
   selector: 'app-results',
   standalone: true,
-  imports: [RouterLink],
-  template: `
-    <h2>Results</h2>
-    @for (recipe of recipes(); track recipe.id) {
-      <div class="recipe-card">
-        <h3>{{ recipe.title }}</h3>
-        <p>{{ recipe.description }}</p>
-        <a [routerLink]="['/recipe', recipe.id]" class="btn">View</a>
-      </div>
-    }
-
-    <!-- Generate new recipe button unten rechts -->
-    <a routerLink="/generate" class="generate-btn">Generate New Recipe</a>
-  `,
-  styles: [`
-    .recipe-card {
-      border: 1px solid #ddd;
-      padding: 1rem;
-      margin: 1rem 0;
-    }
-    .btn {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      background: #007bff;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-    }
-    .generate-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 1rem 2rem;
-      background: #28a745;
-      color: white;
-      text-decoration: none;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-  `],
+  imports: [SvgIconComponent],
+  templateUrl: './results.html',
+  styleUrl: './results.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResultsComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.themeService.setBackground('#396039');
@@ -59,6 +24,14 @@ export class ResultsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.themeService.clearBackground();
     this.themeService.setLogoVariant('green');
+  }
+
+  openRecipe(id: string): void {
+    void this.router.navigate(['/recipe', id]);
+  }
+
+  goToGenerate(): void {
+    void this.router.navigate(['/generate']);
   }
 
   recipes = signal<Recipe[]>([

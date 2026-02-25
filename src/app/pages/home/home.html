@@ -16,11 +16,11 @@
             <img [src]="image.src" [style.z-index]="image.zIndex" alt="Hero ellipse">
         }
     </div>
-    <div class="bottom-text display-row gap-16 display-center-center">
+    <div class="bottom-text">
         <p>Hungry for inspiration?</p>
-        <button class="bottom-btn display-center-center" routerLink="/cookbook">
+        <button class="bottom-btn action-arrow-btn" routerLink="/cookbook">
             Go to cookbook 
-            <img src="/assets/img/hero/icon/arrow.png" alt="cookbook arrow">
+            <app-svg-icon name="forward-btn-creme" [width]="26" [height]="15" />
         </button>
     </div>
 </div>

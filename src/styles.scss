@@ -45,6 +45,36 @@ body {
     border-radius: 20px;
 }
 
+@mixin icon-action-button($size: 32px,
+    $color: #10310B,
+    $hover-bg: #39603966,
+    $active-color: white) {
+    color: $color;
+    width: $size;
+    height: $size;
+
+    &:hover {
+        background-color: $hover-bg;
+    }
+
+    &:active {
+        color: $active-color;
+    }
+}
+
+@mixin flex-layout($direction: row, $align: null, $justify: null) {
+    display: flex;
+    flex-direction: $direction;
+
+    @if $align !=null {
+        align-items: $align;
+    }
+
+    @if $justify !=null {
+        justify-content: $justify;
+    }
+}
+
 .primary-btn-green {
     font-weight: 600;
     font-family: 'quicksand', sans-serif;
@@ -53,6 +83,7 @@ body {
     padding: 16px 26px;
     border: none;
     transition: all 0.125s ease;
+    cursor: pointer;
 
 
     &:hover {
@@ -69,6 +100,7 @@ body {
     padding: 16px 26px;
     border: none;
     transition: all 0.125s ease;
+    cursor: pointer;
 
     &:hover {
         font-weight: 700;
@@ -99,6 +131,36 @@ body {
 
     &:hover {
         background-color: #FAE0C633;
+    }
+}
+
+.action-arrow-btn {
+    @include flex-layout(row, center, center);
+    gap: 10px;
+    padding: 16px 26px;
+    border: none;
+    background-color: transparent;
+    color: #FAF0E6;
+    font-family: 'quicksand', sans-serif;
+    font-size: clamp(1.125rem, 1.5vw, 1.25rem);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #517751;
+    }
+
+    img,
+    svg {
+        width: 26px;
+        height: 15px;
+        display: block;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 400px) {
+        padding: 12px 20px;
     }
 }
 
