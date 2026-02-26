@@ -10,17 +10,72 @@
   </div>
   <h1 class="display-center-center">Choose your preferences</h1>
 
-  <p>Select your preferences for the recipe.</p>
-  <!-- Hier kannst du später ein Formular hinzufügen -->
-  <form>
-    <label for="cuisine">Cuisine:</label>
-    <select id="cuisine">
-      <option value="italian">Italian</option>
-      <option value="german">German</option>
-    </select>
-    <br>
-    <label for="ingredients">Ingredients:</label>
-    <input type="text" id="ingredients" placeholder="e.g. pasta, tomato">
-  </form>
+  <div class="display-column gap-32">
+  <div class="cooking-style display-row display-center-center">
+    <div class="portions display-column gap-16">
+      <p>How many portions you need?</p>
+      <div class="display-row display-ai-center gap-8">
+        <button (click)="decreasePortions()"><app-svg-icon name="minus" size="20"></app-svg-icon></button>
+        <span class="number display-center-center">{{ portions() }}</span>
+        <span>Portions</span>
+        <button (click)="increasePortions()"><app-svg-icon name="plus" size="20"></app-svg-icon></button>
+      </div>
+    </div>
+    <div class="person display-column gap-16">
+      <p>How many are cooking?</p>
+      <div class="display-row display-ai-center gap-8">
+        <button (click)="decreasePersons()"><app-svg-icon name="minus" size="20"></app-svg-icon></button>
+        <span class="number display-center-center">{{ persons() }}</span>
+        <span>Person(s)</span>
+        <button (click)="increasePersons()"><app-svg-icon name="plus" size="20"></app-svg-icon></button>
+      </div>
+    </div>
+  </div>
+  <div class="preference-container display-column gap-24">
+    <div class="cooking-time display-column gap-24">
+      <div class="preference-title display-row display-ai-center gap-8">
+        <h2>Cooking time:</h2>
+      </div>
+      <div class="display-row gap-20">
+        <div class="prep-time display-column gap-12">
+          <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Quick'" (click)="selectCookingTime('Quick')">Quick</button>
+          <p>up to 20 min</p>
+        </div>
+        <div class="prep-time display-column gap-12">
+          <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Medium'" (click)="selectCookingTime('Medium')">Medium</button>
+          <p>25 - 40 min</p>
+        </div>
+        <div class="prep-time display-column gap-12">
+          <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Complex'" (click)="selectCookingTime('Complex')">Complex</button>
+          <p>over 45 min</p>
+        </div>
+      </div>
+    </div>
+    <div class="cuisine display-column gap-24">
+      <div class="preference-title display-row display-ai-center gap-8">
+        <h2>Cuisine</h2>
+      </div>
+      <div class="display-row gap-20 flex-wrap">
+        <button class="tags-btn" [class.selected]="selectedCuisine() === 'German'" (click)="selectCuisine('German')">German</button>
+        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Italian'" (click)="selectCuisine('Italian')">Italian</button>
+        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Indian'" (click)="selectCuisine('Indian')">Indian</button>
+        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Japanese'" (click)="selectCuisine('Japanese')">Japanese</button>
+        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Gourmet'" (click)="selectCuisine('Gourmet')">Gourmet</button>
+        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Fusion'" (click)="selectCuisine('Fusion')">Fusion</button>
+      </div>
+    </div>
+    <div class="diet-preferences display-column gap-24">
+      <div class="preference-title display-row display-ai-center gap-8">
+        <h2>Diet preferences</h2>
+      </div>
+      <div class="display-row gap-20">
+        <button class="tags-btn" [class.selected]="selectedDiet() === 'Vegetarian'" (click)="selectDiet('Vegetarian')">Vegetarian</button>
+        <button class="tags-btn" [class.selected]="selectedDiet() === 'Vegan'" (click)="selectDiet('Vegan')">Vegan</button>
+        <button class="tags-btn" [class.selected]="selectedDiet() === 'Keto'" (click)="selectDiet('Keto')">Keto</button>
+        <button class="tags-btn" [class.selected]="selectedDiet() === 'No Preferences'" (click)="selectDiet('No Preferences')">No Preferences</button>
+      </div>
+    </div>
+  </div>
+</div>
   <a routerLink="/loading" class="btn primary-btn-green display-center-center">Generate a Recipe</a>
 </div>

@@ -46,7 +46,7 @@
                                 aria-haspopup="listbox"
                             >
                                 {{ selectedUnit() }}
-                                <span class="arrow" [class.open]="dropdownOpen()">&#9662;</span>
+                                <svg class="arrow" [class.open]="dropdownOpen()" width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5 5L10 0L0 0L5 5Z" fill="#10310B"/></svg>
                             </button>
                             @if (dropdownOpen()) {
                                 <div class="dropdown-backdrop" (click)="closeDropdown()"></div>
@@ -79,29 +79,65 @@
             <p class="list-title">List of your Ingredients</p>
             <ul class="ingredient-list">
                 @for (item of ingredients(); track item.id) {
-                    <li class="ingredient-item">
-                        <span class="item-prefix">
-                            <span class="item-bullet" aria-hidden="true">{{ itemBullet }}</span>
-                            <span class="item-amount">{{ item.amount }}{{ unitLabel(item.unit) }}</span>
-                        </span>
-                        <span class="item-name">{{ item.name }}</span>
-                        <div class="item-actions">
-                            <button
-                                type="button"
-                                class="icon-btn edit-btn"
-                                (click)="editIngredient(item)"
-                                [attr.aria-label]="'Edit ' + item.name"
-                            >
-                                <app-svg-icon name="edit" [size]="'100%'" />
-                            </button>
-                            <button
-                                type="button"
-                                class="icon-btn delete-btn"
-                                (click)="removeIngredient(item.id)"
-                                [attr.aria-label]="'Remove ' + item.name"
-                            >
-                                <app-svg-icon name="trash" [size]="'100%'" />
-                            </button>
+                    <li class="ingredient-item" [class.editing]="editingIngredient() === item.id" [class.dropdown-open]="editingDropdownOpen() === item.id">
+                        <div class="ingredient-row">
+                            <span class="item-prefix">
+                                <span class="item-bullet" aria-hidden="true">{{ itemBullet }}</span>
+                                @if (editingIngredient() === item.id) {
+                                    <input
+                                        type="text"
+                                        class="serving-input"
+                                        [value]="item.amount"
+                                        (input)="onEditingAmountInput($event, item)"
+                                    >
+                                    <div class="unit-dropdown">
+                                        <button
+                                            class="unit-toggle"
+                                            type="button"
+                                            (click)="toggleEditingDropdown(item)"
+                                            [attr.aria-expanded]="editingDropdownOpen() === item.id"
+                                            aria-haspopup="listbox"
+                                        >
+                                            {{ item.unit }}
+                                            <svg class="arrow" [class.open]="editingDropdownOpen() === item.id" width="10" height="5" viewBox="0 0 10 5" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M5 5L10 0L0 0L5 5Z" fill="#10310B"/></svg>
+                                        </button>
+                                        @if (editingDropdownOpen() === item.id) {
+                                            <div class="dropdown-backdrop" (click)="closeEditingDropdown()"></div>
+                                            <ul class="dropdown-list" role="listbox">
+                                                @for (unit of units; track unit) {
+                                                    <li
+                                                        role="option"
+                                                        [attr.aria-selected]="item.unit === unit"
+                                                        [class.selected]="item.unit === unit"
+                                                        (click)="selectEditingUnit(item, unit)"
+                                                    >{{ unit }}</li>
+                                                }
+                                            </ul>
+                                        }
+                                    </div>
+                                } @else {
+                                    <span class="item-amount">{{ item.amount }}{{ unitLabel(item.unit) }}</span>
+                                }
+                            </span>
+                            <span class="item-name">{{ item.name }}</span>
+                            <div class="item-actions">
+                                <button
+                                    type="button"
+                                    class="icon-btn edit-btn"
+                                    (click)="editIngredient(item)"
+                                    [attr.aria-label]="editingIngredient() === item.id ? 'Save ' + item.name : 'Edit ' + item.name"
+                                >
+                                    <app-svg-icon [name]="editingIngredient() === item.id ? 'check' : 'edit'" [size]="'100%'" />
+                                </button>
+                                <button
+                                    type="button"
+                                    class="icon-btn delete-btn"
+                                    (click)="removeIngredient(item.id)"
+                                    [attr.aria-label]="'Remove ' + item.name"
+                                >
+                                    <app-svg-icon name="trash" [size]="'100%'" />
+                                </button>
+                            </div>
                         </div>
                     </li>
                 } @empty {

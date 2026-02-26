@@ -1,3 +1,5 @@
+@import '../../../styles.scss';
+
 :host {
     background: white;
 }
@@ -29,4 +31,80 @@ select {
     width: 100%;
     padding: 0.5rem;
     margin-top: 0.5rem;
+}
+
+.number {
+    font-size: 20px;
+    font-weight: 500;
+    background-color: #39603933;
+    padding: 2px 5px 1px 5px;
+    width: 24px;
+    border-radius: 4px;
+}
+
+.cooking-style {
+
+
+    gap: clamp(3rem, 5vw, 120px);
+
+    span {
+        font-size: 20px;
+        font-weight: 500;
+    }
+
+    button {
+        display: flex;
+        align-items: center;
+        border: none;
+        background: transparent;
+        padding: 4px;
+        border-radius: 4px;
+        height: auto;
+        cursor: pointer;
+        transition: all 0.125s ease;
+
+        &:hover {
+            background-color: #E7ECE7;
+        }
+
+        &:active {
+            background-color: #C4D0C4;
+        }
+    }
+
+    @media (max-width: 600px) {
+        flex-direction: column;
+    }
+}
+
+.preference-container {
+    @include green-container;
+
+    h2 {
+        font-size: 24px;
+        font-weight: 500;
+    }
+}
+
+.prep-time {
+    p {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1E5515;
+    }
+}
+
+.tags-btn {
+    @include tags-btn;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:not(.selected):hover {
+        background-color: #FAE0C6;
+    }
+
+    &.selected {
+        background-color: #39603933;
+        color: #10310B;
+    }
 }

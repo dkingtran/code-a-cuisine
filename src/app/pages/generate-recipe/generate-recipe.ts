@@ -37,6 +37,8 @@ export class GenerateRecipeComponent {
   ingredients = signal<Ingredient[]>(this.loadFromStorage());
   suggestions = signal<string[]>([]);
   suggestionsOpen = signal(false);
+  editingIngredient = signal<number | null>(null);
+  editingDropdownOpen = signal<number | null>(null);
 
   constructor() {
     effect(() => {
@@ -102,10 +104,18 @@ export class GenerateRecipeComponent {
   }
 
   editIngredient(ingredient: Ingredient): void {
-    this.ingredientName.set(ingredient.name);
-    this.servingAmount.set(ingredient.amount);
-    this.selectedUnit.set(ingredient.unit);
-    this.removeIngredient(ingredient.id);
+    if (this.editingIngredient() === ingredient.id) {
+      // Save changes
+      this.saveEditedIngredient();
+    } else {
+      this.editingIngredient.set(ingredient.id);
+    }
+  }
+
+  private saveEditedIngredient(): void {
+    // Changes are already saved live, just exit edit mode
+    this.editingIngredient.set(null);
+    this.editingDropdownOpen.set(null);
   }
 
   onIngredientNameInput(event: Event): void {
@@ -160,6 +170,30 @@ export class GenerateRecipeComponent {
     const filtered = input.value.replace(/[^0-9]/g, '').slice(0, 4);
     input.value = filtered;
     this.servingAmount.set(filtered);
+  }
+
+  onEditingAmountInput(event: Event, item: Ingredient): void {
+    const input = event.target as HTMLInputElement;
+    const filtered = input.value.replace(/[^0-9]/g, '').slice(0, 4);
+    input.value = filtered;
+    this.ingredients.update(list =>
+      list.map(i => i.id === item.id ? { ...i, amount: filtered } : i)
+    );
+  }
+
+  toggleEditingDropdown(item: Ingredient): void {
+    this.editingDropdownOpen.set(this.editingDropdownOpen() === item.id ? null : item.id);
+  }
+
+  closeEditingDropdown(): void {
+    this.editingDropdownOpen.set(null);
+  }
+
+  selectEditingUnit(item: Ingredient, unit: 'gram' | 'ml' | 'piece'): void {
+    this.ingredients.update(list =>
+      list.map(i => i.id === item.id ? { ...i, unit } : i)
+    );
+    this.editingDropdownOpen.set(null);
   }
 
   goToPreferences(): void {

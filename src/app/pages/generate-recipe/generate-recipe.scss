@@ -150,9 +150,9 @@
     user-select: none;
 
     .arrow {
-        display: inline-block;
+        display: block;
+        flex-shrink: 0;
         transition: transform 0.15s ease;
-        line-height: 1;
 
         &.open {
             transform: rotate(180deg);
@@ -250,15 +250,28 @@
 }
 
 .ingredient-item {
-    @include flex-layout(row, center);
-    gap: 16px;
-    font-size: 18px;
-    background-color: transparent;
+    @include flex-layout(column);
     border-radius: 8px;
-    padding: 4px 8px;
 
-    &:hover {
+    &:hover>.ingredient-row {
         background-color: #FAF0E6;
+    }
+
+    &.editing:hover>.ingredient-row {
+        background-color: transparent;
+    }
+
+    .ingredient-row {
+        @include flex-layout(row, center);
+        gap: 16px;
+        font-size: 18px;
+        border-radius: 8px;
+        padding: 4px 8px;
+        transition: background-color 0.125s ease, margin-bottom 0.15s ease;
+    }
+
+    &.dropdown-open>.ingredient-row {
+        margin-bottom: 92px;
     }
 
     .item-prefix {
@@ -266,6 +279,76 @@
         gap: 4px;
         white-space: nowrap;
         min-width: 3.9rem;
+
+        .serving-input {
+            @include input-creme;
+            width: 3.8125rem;
+            flex-shrink: 0;
+            text-align: center;
+
+            &::placeholder {
+                color: #10310B4D;
+                transition: opacity 0.1s ease;
+            }
+
+            &:focus::placeholder {
+                opacity: 0;
+            }
+        }
+
+        .unit-dropdown {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .unit-toggle {
+            @include input-creme;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 84px;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+            flex-shrink: 0;
+
+            .arrow {
+                display: block;
+                flex-shrink: 0;
+                transition: transform 0.2s ease;
+
+                &.open {
+                    transform: rotate(180deg);
+                }
+            }
+        }
+
+        .dropdown-list {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            z-index: 11;
+            list-style: none;
+            overflow: hidden;
+            min-width: 100%;
+
+            li {
+                padding: 4px 8px;
+                cursor: pointer;
+                font-family: 'quicksand', sans-serif;
+                color: #10310B;
+                transition: all 0.125s ease;
+
+                &:hover {
+                    transform: scale(1.05);
+                }
+
+                &.selected {
+                    font-weight: 700;
+                }
+            }
+        }
     }
 
     .item-bullet {
@@ -311,11 +394,11 @@
 }
 
 .edit-btn {
-    @include icon-action-button (24px);
+    @include icon-action-button (26px);
 }
 
 .delete-btn {
-    @include icon-action-button (24px);
+    @include icon-action-button (26px);
 }
 
 .empty-state {
