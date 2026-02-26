@@ -1,81 +1,76 @@
 
 <div class="main-content">
-  <div class="back-btn">
-    <a class="action-back-btn" routerLink="/ingredients">
-      <svg width="22" height="15" viewBox="0 0 22 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M21 8.36401C21.5523 8.36401 22 7.9163 22 7.36401C22 6.81173 21.5523 6.36401 21 6.36401L21 8.36401ZM0.292893 6.65691C-0.0976314 7.04743 -0.0976315 7.68059 0.292892 8.07112L6.65685 14.4351C7.04738 14.8256 7.68054 14.8256 8.07107 14.4351C8.46159 14.0446 8.46159 13.4114 8.07107 13.0209L2.41421 7.36401L8.07107 1.70716C8.46159 1.31663 8.46159 0.683469 8.07107 0.292945C7.68054 -0.0975797 7.04738 -0.0975797 6.65686 0.292945L0.292893 6.65691ZM21 7.36401L21 6.36401L1 6.36401L1 7.36401L1 8.36401L21 8.36401L21 7.36401Z" fill="#1E5515"/>
-      </svg>
-      <p>Ingredients</p>
-    </a>
-  </div>
   <h1 class="display-center-center">Choose your preferences</h1>
 
-  <div class="display-column gap-32">
-  <div class="cooking-style display-row display-center-center">
-    <div class="portions display-column gap-16">
-      <p>How many portions you need?</p>
-      <div class="display-row display-ai-center gap-8">
-        <button (click)="decreasePortions()"><app-svg-icon name="minus" size="20"></app-svg-icon></button>
-        <span class="number display-center-center">{{ portions() }}</span>
-        <span>Portions</span>
-        <button (click)="increasePortions()"><app-svg-icon name="plus" size="20"></app-svg-icon></button>
-      </div>
-    </div>
-    <div class="person display-column gap-16">
-      <p>How many are cooking?</p>
-      <div class="display-row display-ai-center gap-8">
-        <button (click)="decreasePersons()"><app-svg-icon name="minus" size="20"></app-svg-icon></button>
-        <span class="number display-center-center">{{ persons() }}</span>
-        <span>Person(s)</span>
-        <button (click)="increasePersons()"><app-svg-icon name="plus" size="20"></app-svg-icon></button>
-      </div>
-    </div>
-  </div>
-  <div class="preference-container display-column gap-24">
-    <div class="cooking-time display-column gap-24">
-      <div class="preference-title display-row display-ai-center gap-8">
-        <h2>Cooking time:</h2>
-      </div>
-      <div class="display-row gap-20">
-        <div class="prep-time display-column gap-12">
-          <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Quick'" (click)="selectCookingTime('Quick')">Quick</button>
-          <p>up to 20 min</p>
+  <div class="main-container display-column gap-32 display-center-center">
+    <div class="cooking-style display-row">
+      <div class="portions display-column gap-16">
+        <p>How many portions you need?</p>
+        <div class="display-row display-ai-center gap-8">
+          <button (click)="decreasePortions()"><app-svg-icon name="minus" size="20"></app-svg-icon></button>
+          <span class="number display-center-center">{{ portions() }}</span>
+          <span>Portions</span>
+          <button (click)="increasePortions()"><app-svg-icon name="plus" size="20"></app-svg-icon></button>
         </div>
-        <div class="prep-time display-column gap-12">
-          <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Medium'" (click)="selectCookingTime('Medium')">Medium</button>
-          <p>25 - 40 min</p>
-        </div>
-        <div class="prep-time display-column gap-12">
-          <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Complex'" (click)="selectCookingTime('Complex')">Complex</button>
-          <p>over 45 min</p>
+      </div>
+      <div class="person display-column gap-16">
+        <p>How many are cooking?</p>
+        <div class="display-row display-ai-center gap-8">
+          <button (click)="decreasePersons()"><app-svg-icon name="minus" size="20"></app-svg-icon></button>
+          <span class="number display-center-center">{{ persons() }}</span>
+          <span>Person(s)</span>
+          <button (click)="increasePersons()"><app-svg-icon name="plus" size="20"></app-svg-icon></button>
         </div>
       </div>
     </div>
-    <div class="cuisine display-column gap-24">
-      <div class="preference-title display-row display-ai-center gap-8">
-        <h2>Cuisine</h2>
+    <div class="preference-container display-column gap-24">
+      <div class="cooking-time display-column gap-24">
+        <div class="preference-title display-row display-ai-center" [style.gap]="'4px'">
+          <app-svg-icon name="clock" size="20"></app-svg-icon>
+          <h2>Cooking time:</h2>
+        </div>
+        <div class="display-row gap-20 flex-wrap">
+          <div class="prep-time display-column gap-12">
+            <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Quick'" (click)="selectCookingTime('Quick')">Quick</button>
+            <p>up to 20 min</p>
+          </div>
+          <div class="prep-time display-column gap-12">
+            <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Medium'" (click)="selectCookingTime('Medium')">Medium</button>
+            <p>25 - 40 min</p>
+          </div>
+          <div class="prep-time display-column gap-12">
+            <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Complex'" (click)="selectCookingTime('Complex')">Complex</button>
+            <p>over 45 min</p>
+          </div>
+        </div>
       </div>
-      <div class="display-row gap-20 flex-wrap">
-        <button class="tags-btn" [class.selected]="selectedCuisine() === 'German'" (click)="selectCuisine('German')">German</button>
-        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Italian'" (click)="selectCuisine('Italian')">Italian</button>
-        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Indian'" (click)="selectCuisine('Indian')">Indian</button>
-        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Japanese'" (click)="selectCuisine('Japanese')">Japanese</button>
-        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Gourmet'" (click)="selectCuisine('Gourmet')">Gourmet</button>
-        <button class="tags-btn" [class.selected]="selectedCuisine() === 'Fusion'" (click)="selectCuisine('Fusion')">Fusion</button>
+      <div class="cuisine display-column gap-24">
+        <div class="preference-title display-row display-ai-center" [style.gap]="'4px'">
+          <app-svg-icon name="globe" size="20"></app-svg-icon>
+          <h2>Cuisine</h2>
+        </div>
+        <div class="display-row gap-20 flex-wrap">
+          <button class="tags-btn" [class.selected]="selectedCuisine() === 'German'" (click)="selectCuisine('German')">German</button>
+          <button class="tags-btn" [class.selected]="selectedCuisine() === 'Italian'" (click)="selectCuisine('Italian')">Italian</button>
+          <button class="tags-btn" [class.selected]="selectedCuisine() === 'Indian'" (click)="selectCuisine('Indian')">Indian</button>
+          <button class="tags-btn" [class.selected]="selectedCuisine() === 'Japanese'" (click)="selectCuisine('Japanese')">Japanese</button>
+          <button class="tags-btn" [class.selected]="selectedCuisine() === 'Gourmet'" (click)="selectCuisine('Gourmet')">Gourmet</button>
+          <button class="tags-btn" [class.selected]="selectedCuisine() === 'Fusion'" (click)="selectCuisine('Fusion')">Fusion</button>
+        </div>
+      </div>
+      <div class="diet-preferences display-column gap-24">
+        <div class="preference-title display-row display-ai-center" [style.gap]="'4px'">
+          <app-svg-icon name="fork-knife" size="20"></app-svg-icon>
+          <h2>Diet preferences</h2>
+        </div>
+        <div class="display-row gap-20 flex-wrap">
+          <button class="tags-btn" [class.selected]="selectedDiet() === 'Vegetarian'" (click)="selectDiet('Vegetarian')">Vegetarian</button>
+          <button class="tags-btn" [class.selected]="selectedDiet() === 'Vegan'" (click)="selectDiet('Vegan')">Vegan</button>
+          <button class="tags-btn" [class.selected]="selectedDiet() === 'Keto'" (click)="selectDiet('Keto')">Keto</button>
+          <button class="tags-btn" [class.selected]="selectedDiet() === 'No Preferences'" (click)="selectDiet('No Preferences')">No Preferences</button>
+        </div>
       </div>
     </div>
-    <div class="diet-preferences display-column gap-24">
-      <div class="preference-title display-row display-ai-center gap-8">
-        <h2>Diet preferences</h2>
-      </div>
-      <div class="display-row gap-20">
-        <button class="tags-btn" [class.selected]="selectedDiet() === 'Vegetarian'" (click)="selectDiet('Vegetarian')">Vegetarian</button>
-        <button class="tags-btn" [class.selected]="selectedDiet() === 'Vegan'" (click)="selectDiet('Vegan')">Vegan</button>
-        <button class="tags-btn" [class.selected]="selectedDiet() === 'Keto'" (click)="selectDiet('Keto')">Keto</button>
-        <button class="tags-btn" [class.selected]="selectedDiet() === 'No Preferences'" (click)="selectDiet('No Preferences')">No Preferences</button>
-      </div>
-    </div>
-  </div>
 </div>
   <a routerLink="/loading" class="btn primary-btn-green display-center-center">Generate a Recipe</a>
 </div>

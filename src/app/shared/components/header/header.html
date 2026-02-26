@@ -2,4 +2,12 @@
     <a routerLink="/">
         <img [src]="logoSrc" alt="Code-A-Cuisine Logo">
     </a>
+    @if (backConfig()) {
+        <div class="back-btn">
+            <a class="action-back-btn" [routerLink]="backConfig()!.route">
+                <app-svg-icon name="back-btn-green" [width]="22" [height]="15"></app-svg-icon>
+                <p>{{ backConfig()!.label }}</p>
+            </a>
+        </div>
+    }
 </div>

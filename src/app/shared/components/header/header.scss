@@ -1,4 +1,8 @@
 .header {
     padding: clamp(12px, 3vw, 40px) clamp(16px, 5vw, 68px);
     background-color: transparent;
+
+    .back-btn {
+        margin-top: 32px;
+    }
 }
