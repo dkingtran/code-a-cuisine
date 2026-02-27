@@ -16,10 +16,10 @@ export class LoadingComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.themeService.setBackground('#396039');
-    // Simulate API call duration
+    // Duration matches the loading GIF animation length (~13.16s)
     setTimeout(() => {
       this.router.navigate(['/results']);
-    }, 3000); // 3 seconds
+    }, 13160);
   }
 
   ngOnDestroy(): void {

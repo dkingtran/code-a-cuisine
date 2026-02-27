@@ -14,10 +14,6 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/preferences/preferences').then(m => m.PreferencesComponent)
     },
     {
-        path: 'loading',
-        loadComponent: () => import('./pages/loading/loading').then(m => m.LoadingComponent)
-    },
-    {
         path: 'results',
         loadComponent: () => import('./pages/results/results').then(m => m.ResultsComponent)
     },

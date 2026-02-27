@@ -1,0 +1,33 @@
+:host {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background-color: #396039;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 32px;
+}
+
+:host.visible {
+    display: flex;
+}
+
+.loading-container {
+    text-align: center;
+}
+
+.loading-gif {
+    min-width: 100px;
+    min-height: 120px;
+    max-width: 200px;
+    max-height: 240px;
+    aspect-ratio: 4 / 4.7;
+}
+
+p {
+    font-size: 1.2rem;
+    color: #fff;
+    margin: 0;
+}

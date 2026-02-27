@@ -1,5 +1,17 @@
 <div class="main-content">
-  <h2>Results</h2>
+  <div class="header">
+    <div class="header-left">
+      <h1 class="desktop-view">The recipe results</h1>
+      <h1 class="mobile-view">Generated recipes</h1>
+      <p>We took what you have and let our AI do the thinking. Here are 3 easy recipes you can make right now!</p>
+      <div class="tags">(tags btn, zum Beispiel: italian und quick)</div>
+    </div>
+    <div class="header-right">
+      <div class="header-img">
+        <img src="/assets/img/results/visual.png" alt="Illustration of a chef holding a dish" class="header-image">
+      </div>
+    </div>
+  </div>
   @for (recipe of recipes(); track recipe.id) {
     <div class="recipe-card">
       <h3>{{ recipe.title }}</h3>

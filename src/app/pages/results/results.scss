@@ -2,6 +2,95 @@
     display: block;
 }
 
+.header {
+    color: #FAF0E6;
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    align-items: flex-start;
+
+    h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 600;
+        color: #FAF0E6;
+    }
+
+    p {
+        font-size: clamp(18px, 3vw, 1.5rem);
+    }
+}
+
+.header-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.header-right {
+    flex-shrink: 0;
+}
+
+.header-img {
+    max-width: fit-content;
+}
+
+.header-image {
+    width: 100%;
+    height: auto;
+}
+
+@media (max-width: 1200px) {
+    .header {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .header-left {
+        order: 1;
+        display: contents;
+        /* damit die Kinder direkt in .header sind für order */
+    }
+
+    .header-right {
+        order: 2;
+    }
+
+    h1 {
+        order: 1;
+    }
+
+    .header-img {
+        order: 2;
+    }
+
+    p {
+        order: 3;
+    }
+
+    .tags {
+        order: 4;
+    }
+}
+
+.desktop-view {
+    display: block;
+}
+
+.mobile-view {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .desktop-view {
+        display: none;
+    }
+
+    .mobile-view {
+        display: block;
+    }
+}
+
 .recipe-card {
     border: 1px solid #ddd;
     padding: 1rem;

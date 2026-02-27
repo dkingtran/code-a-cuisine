@@ -32,7 +32,8 @@
 
     p {
         @include font-color-green;
-        font-weight: 600;
+        font-weight: 500;
+        font-size: 20px;
     }
 }
 
@@ -72,6 +73,7 @@
 
     input {
         width: 100%;
+        font-weight: 500;
     }
 }
 
@@ -118,6 +120,7 @@
     input {
         width: 3.8125rem;
         flex-shrink: 0;
+        font-weight: 500;
         text-align: center;
 
         &::placeholder {
@@ -145,6 +148,8 @@
     align-items: center;
     width: 84px;
     gap: 6px;
+    font-weight: 500;
+    font-size: 16px;
     cursor: pointer;
     white-space: nowrap;
     user-select: none;
@@ -239,8 +244,8 @@
 
 .list-title {
     @include font-color-green;
-    font-weight: 700;
-    font-size: 1.125rem;
+    font-weight: 500;
+    font-size: 20px;
 }
 
 .ingredient-list {
@@ -284,6 +289,7 @@
             @include input-creme;
             width: 3.8125rem;
             flex-shrink: 0;
+            font-weight: 500;
             text-align: center;
 
             &::placeholder {
@@ -308,6 +314,8 @@
             align-items: center;
             width: 84px;
             gap: 6px;
+            font-weight: 500;
+            font-size: 16px;
             cursor: pointer;
             white-space: nowrap;
             user-select: none;
