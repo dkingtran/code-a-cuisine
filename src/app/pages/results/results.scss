@@ -52,6 +52,7 @@
 .recipe-card {
     @include recipe-card;
     width: 100%;
+    height: 100%;
 
     h1 {
         display: flex;
@@ -78,6 +79,7 @@
     .primary-btn-creme {
         width: fit-content;
         padding: 16px 16px;
+        margin-top: auto;
     }
 }
 
