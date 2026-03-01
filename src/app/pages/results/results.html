@@ -12,13 +12,22 @@
       </div>
     </div>
   </div>
+  <div class="recipe-container display-row gap-24 display-center-center">
   @for (recipe of recipes(); track recipe.id) {
-    <div class="recipe-card">
-      <h3>{{ recipe.title }}</h3>
-      <p>{{ recipe.description }}</p>
-      <button type="button" class="btn" (click)="openRecipe(recipe.id)">View</button>
-    </div>
+      <div class="recipe-card display-column gap-16">
+        <div class="recipe-header display-row gap-8 align-center">
+          <app-svg-icon name="recipe" [width]="40" [height]="28" />
+          <h1>Recipe {{ recipe.number }}</h1>
+        </div>
+        <h3>{{ recipe.title }}</h3>
+        <div class="recipe-time display-row gap-4 display-ai-center">
+          <app-svg-icon name="clock" />
+          <span>Cooking time: {{ recipe.time }}min</span>
+        </div>
+        <button type="button" class="primary-btn-creme" (click)="openRecipe(recipe.id)">View</button>
+      </div>
   }
+  </div>
 
   <button type="button" class="generate-btn action-arrow-btn" (click)="goToGenerate()">
     Generate New Recipe

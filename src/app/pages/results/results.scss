@@ -1,3 +1,5 @@
+@import '../../../styles.scss';
+
 :host {
     display: block;
 }
@@ -40,7 +42,72 @@
     height: auto;
 }
 
+.recipe-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding-top: clamp(2rem, 7vw, 5.5rem);
+}
+
+.recipe-card {
+    @include recipe-card;
+    width: 100%;
+
+    h1 {
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1E5515;
+    }
+
+    h3 {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        font-weight: 600;
+        color: #10310B;
+    }
+
+    .recipe-time {
+        span {
+            font-size: clamp(18px, 2vw, 1.25rem);
+            color: #396039;
+            font-weight: 500;
+        }
+    }
+
+    .primary-btn-creme {
+        width: fit-content;
+        padding: 16px 16px;
+    }
+}
+
+.generate-btn {
+    display: flex;
+    position: unset;
+    margin-top: 32px;
+    margin-left: auto;
+}
+
+.desktop-view {
+    display: block;
+}
+
+.mobile-view {
+    display: none;
+}
+
+@media (max-width: 1350px) {
+    .recipe-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .recipe-card:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
 @media (max-width: 1200px) {
+
     .header {
         flex-direction: column;
         gap: 16px;
@@ -56,32 +123,28 @@
         order: 2;
     }
 
-    h1 {
+    .header h1 {
         order: 1;
     }
 
-    .header-img {
+    .header .header-img {
         order: 2;
     }
 
-    p {
+    .header p {
         order: 3;
     }
 
-    .tags {
+    .header .tags {
         order: 4;
     }
 }
 
-.desktop-view {
-    display: block;
-}
-
-.mobile-view {
-    display: none;
-}
-
 @media (max-width: 768px) {
+    .recipe-container {
+        grid-template-columns: 1fr;
+    }
+
     .desktop-view {
         display: none;
     }
@@ -89,25 +152,8 @@
     .mobile-view {
         display: block;
     }
-}
 
-.recipe-card {
-    border: 1px solid #ddd;
-    padding: 1rem;
-    margin: 1rem 0;
-}
-
-.btn {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    background: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-}
-
-.generate-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+    .generate-btn {
+        margin: 48px auto;
+    }
 }

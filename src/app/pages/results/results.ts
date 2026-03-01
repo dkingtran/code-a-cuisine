@@ -33,7 +33,8 @@ export class ResultsComponent implements OnInit, OnDestroy {
   }
 
   recipes = signal<Recipe[]>([
-    { id: '1', title: 'Spaghetti Carbonara', description: 'Classic Italian pasta', ingredients: [], instructions: [], cuisine: 'italian' },
-    { id: '2', title: 'Schnitzel', description: 'German breaded cutlet', ingredients: [], instructions: [], cuisine: 'german' }
+    { id: '1', number: 1, title: 'Spaghetti Carbonara', description: 'Classic Italian pasta', ingredients: [], instructions: [], cuisine: 'italian', time: 20 },
+    { id: '2', number: 2, title: 'Schnitzel', description: 'German breaded cutlet', ingredients: [], instructions: [], cuisine: 'german', time: 30 },
+    { id: '3', number: 3, title: 'Taco al Pastor', description: 'Mexican street taco with marinated pork', ingredients: [], instructions: [], cuisine: 'mexican', time: 25 }
   ]);
 }

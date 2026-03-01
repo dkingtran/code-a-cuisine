@@ -83,8 +83,8 @@ export class CuisineRecipesComponent {
       this.cuisineType.set(type);
       // TODO: Load from service with pagination
       this.recipes.set([
-        { id: '1', title: 'Recipe 1', description: 'Desc', ingredients: [], instructions: [], cuisine: type },
-        { id: '2', title: 'Recipe 2', description: 'Desc', ingredients: [], instructions: [], cuisine: type }
+        { id: '1', number: 1, title: 'Recipe 1', description: 'Desc', ingredients: [], instructions: [], cuisine: type, time: 15 },
+        { id: '2', number: 2, title: 'Recipe 2', description: 'Desc', ingredients: [], instructions: [], cuisine: type, time: 25 }
       ]);
     }
   }

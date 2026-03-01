@@ -49,6 +49,12 @@ a {
     border-radius: 20px;
 }
 
+@mixin recipe-card {
+    border-radius: 20px;
+    background-color: #DBE0DB;
+    padding: clamp(16px, 2.5vw, 25px) clamp(20px, 3vw, 32px);
+}
+
 @mixin icon-action-button($size: 32px,
     $color: #10310B,
     $hover-bg: #39603966,
@@ -265,6 +271,10 @@ a {
 .flex-wrap {
     display: flex;
     flex-wrap: wrap;
+}
+
+.gap-4 {
+    gap: 4px;
 }
 
 .gap-8 {

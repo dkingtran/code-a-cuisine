@@ -52,7 +52,7 @@ export class RecipeViewComponent {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       // TODO: Load from service
-      this.recipe.set({ id, title: 'Sample Recipe', description: 'Description', ingredients: ['Ing1', 'Ing2'], instructions: ['Step1', 'Step2'], cuisine: 'italian' });
+      this.recipe.set({ id, number: 1, title: 'Sample Recipe', description: 'Description', ingredients: ['Ing1', 'Ing2'], instructions: ['Step1', 'Step2'], cuisine: 'italian', time: 20 });
     }
   }
 }
