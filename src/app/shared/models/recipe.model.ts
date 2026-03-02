@@ -11,6 +11,7 @@ export interface Recipe {
     title: string;
     description: string;
     ingredients: string[];
+    extraIngredients?: string[];
     instructions: string[];
     cuisine: string;
     time: number;

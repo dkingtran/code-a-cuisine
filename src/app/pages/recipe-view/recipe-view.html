@@ -33,30 +33,38 @@
           }
         </div>
 
-        <div class="right-section display-column gap-16">
+        <div class="right-section display-column gap-24">
           <!-- Tags + Likes -->
           <div class="right-tags display-row gap-8 flex-wrap display-ai-center">
             @for (tag of recipe()!.tags; track tag) {
               <span class="recipe-tag">{{ tag }}</span>
             }
             @if (recipe()!.likes !== undefined) {
-              <span class="recipe-tag recipe-tag--likes">♥ {{ recipe()!.likes }}</span>
+              <span class="recipe-tag recipe-tag--likes"><app-svg-icon name="heart" size="18" /> {{ recipe()!.likes }}</span>
             }
           </div>
 
           <!-- Nutritional information -->
           @if (recipe()!.nutrition; as n) {
-            <div class="nutrition display-column gap-12">
+            <div class="nutrition display-column gap-8">
               <span class="nutrition-title">Nutritional Information</span>
               <div class="nutrition-grid">
-                <span class="nutrition-label">Energie</span>
-                <span class="nutrition-label">Protein</span>
-                <span class="nutrition-label">Fat</span>
-                <span class="nutrition-label">Carbs</span>
-                <span class="nutrition-value">{{ n.calories }} kcal</span>
-                <span class="nutrition-value">{{ n.protein }} g</span>
-                <span class="nutrition-value">{{ n.fat }} g</span>
-                <span class="nutrition-value">{{ n.carbs }} g</span>
+                <div class="nutrition-item">
+                  <span class="nutrition-label">Energie</span>
+                  <span class="nutrition-value">{{ n.calories }} kcal</span>
+                </div>
+                <div class="nutrition-item">
+                  <span class="nutrition-label">Protein</span>
+                  <span class="nutrition-value">{{ n.protein }} g</span>
+                </div>
+                <div class="nutrition-item">
+                  <span class="nutrition-label">Fat</span>
+                  <span class="nutrition-value">{{ n.fat }} g</span>
+                </div>
+                <div class="nutrition-item">
+                  <span class="nutrition-label">Carbs</span>
+                  <span class="nutrition-value">{{ n.carbs }} g</span>
+                </div>
               </div>
             </div>
           }
@@ -65,17 +73,40 @@
 
       <!-- Full-width: Ingredients -->
       <div class="ingredients-section">
-        <h2>Ingredients</h2>
-        <ul class="ingredients-list display-column gap-8">
-          @for (ingredient of recipe()!.ingredients; track ingredient) {
-            <li>{{ ingredient }}</li>
+        <div class="banner banner-ingredients">
+          <div class="banner-img banner-img--desktop"><app-svg-icon name="banner-ingredients" /></div>
+          <div class="banner-img banner-img--mobile"><app-svg-icon name="banner-ingredients-mobile" /></div>
+          <h2>Ingredients</h2>
+        </div>
+        <div class="ingredients-columns">
+          <div class="ingredients-column">
+            <h3>Your Ingredients</h3>
+            <ul class="ingredients-list display-column gap-8">
+              @for (ingredient of recipe()!.ingredients; track ingredient) {
+                <li>{{ ingredient }}</li>
+              }
+            </ul>
+          </div>
+          @if (recipe()!.extraIngredients?.length) {
+            <div class="ingredients-column">
+              <h3>Extra Ingredients</h3>
+              <ul class="ingredients-list display-column gap-8">
+                @for (ingredient of recipe()!.extraIngredients!; track ingredient) {
+                  <li>{{ ingredient }}</li>
+                }
+              </ul>
+            </div>
           }
-        </ul>
+        </div>
       </div>
 
       <!-- Full-width: Directions -->
       <div class="directions-section">
-        <h2>Directions</h2>
+        <div class="banner banner-directions">
+          <div class="banner-img banner-img--desktop"><app-svg-icon name="banner-directions" /></div>
+          <div class="banner-img banner-img--mobile"><app-svg-icon name="banner-directions-mobile" /></div>
+          <h2>Directions</h2>
+        </div>
         <ol class="directions-list display-column gap-12">
           @for (step of recipe()!.instructions; track step) {
             <li>{{ step }}</li>

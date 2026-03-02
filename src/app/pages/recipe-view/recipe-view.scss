@@ -21,11 +21,13 @@
 
     @media (max-width: 768px) {
         flex-direction: column;
+        gap: 48px;
     }
 }
 
 .left-section {
     flex: 1;
+    justify-content: space-between;
 }
 
 .right-section {
@@ -34,6 +36,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+
+    @media (max-width: 768px) {
+        flex-direction: column-reverse;
+    }
 }
 
 /* ---- Left section ---- */
@@ -83,34 +89,67 @@ h1 {
 
 .recipe-tag {
     @include tags-btn-green;
+    font-size: 18px;
 }
 
-.nutrition-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #10310B;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+.recipe-tag--likes {
+    font-size: 16px;
 }
 
-.nutrition-grid {
-    display: grid;
-    grid-template-columns: repeat(4, auto);
-    justify-content: start;
-    gap: 4px clamp(16px, 3vw, 32px);
+.nutrition {
+    margin-left: 8px;
+
+    .nutrition-title {
+        font-size: 18px;
+        font-weight: 500;
+        color: #10310B;
+    }
+
+    .nutrition-grid {
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        justify-content: start;
+        gap: clamp(16px, 3vw, 32px);
+
+        @media (max-width: 400px) {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .nutrition-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .nutrition-label {
+        font-size: 22px;
+        font-weight: 700;
+        color: #10310B;
+
+        @media (max-width: 768px) {
+            font-size: 18px;
+            font-weight: 600;
+        }
+    }
+
+    .nutrition-value {
+        font-size: 20px;
+        font-weight: 500;
+        color: #10310B;
+
+        @media (max-width: 768px) {
+            font-size: 18px;
+            font-weight: 600;
+        }
+    }
+
+    @media (max-width: 768px) {
+        margin-left: 0;
+    }
+
 }
 
-.nutrition-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #396039;
-}
-
-.nutrition-value {
-    font-size: 15px;
-    font-weight: 500;
-    color: #10310B;
-}
 
 /* ---- Full-width sections ---- */
 
@@ -119,11 +158,69 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.banner-img--mobile {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .banner-img--desktop {
+        display: none;
+    }
+
+    .banner-img--mobile {
+        display: block;
+    }
+}
+
+.banner {
+    position: relative;
 
     h2 {
-        font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        font-size: clamp(20px, 2.5vw, 32px);
         font-weight: 600;
         color: #1E5515;
+        white-space: nowrap;
+    }
+}
+
+.banner-directions {
+    h2 {
+        top: 60%;
+
+        @media (max-width: 480px) {
+            top: 50%;
+        }
+    }
+}
+
+.ingredients-columns {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+    gap: clamp(40px, 6vw, 80px);
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ingredients-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    h3 {
+        font-size: clamp(16px, 2vw, 20px);
+        font-weight: 600;
+        color: #1E5515;
+        margin: 0;
     }
 }
 
