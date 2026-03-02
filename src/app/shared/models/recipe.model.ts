@@ -1,3 +1,10 @@
+export interface RecipeNutrition {
+    calories: number;
+    protein: number;
+    fat: number;
+    carbs: number;
+}
+
 export interface Recipe {
     id: string;
     number: number;
@@ -8,6 +15,9 @@ export interface Recipe {
     cuisine: string;
     time: number;
     imageUrl?: string;
+    tags?: string[];
+    likes?: number;
+    nutrition?: RecipeNutrition;
 }
 
 export interface Cuisine {

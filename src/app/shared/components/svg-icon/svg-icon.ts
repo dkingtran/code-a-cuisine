@@ -14,7 +14,11 @@ export type SvgIconName =
   | 'clock'
   | 'globe'
   | 'fork-knife'
-  | 'recipe';
+  | 'recipe'
+  | 'chef-1'
+  | 'chef-2'
+  | 'chef-3'
+  | 'chef-4';
 
 @Component({
   selector: 'app-svg-icon',
@@ -109,6 +113,22 @@ export type SvgIconName =
     @if (isRecipe()) {
       <img ngSrc="/assets/img/results/icon/recipe-icon.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
     }
+
+    @if (isChef1()) {
+      <img ngSrc="/assets/img/recipe-view/icon/chef_1.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
+    }
+
+    @if (isChef2()) {
+      <img ngSrc="/assets/img/recipe-view/icon/chef_2.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
+    }
+
+    @if (isChef3()) {
+      <img ngSrc="/assets/img/recipe-view/icon/chef_3.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
+    }
+
+    @if (isChef4()) {
+      <img ngSrc="/assets/img/recipe-view/icon/chef_4.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
+    }
   `,
 })
 export class SvgIconComponent {
@@ -135,6 +155,10 @@ export class SvgIconComponent {
   readonly isGlobe = computed(() => this.name() === 'globe');
   readonly isForkKnife = computed(() => this.name() === 'fork-knife');
   readonly isRecipe = computed(() => this.name() === 'recipe');
+  readonly isChef1 = computed(() => this.name() === 'chef-1');
+  readonly isChef2 = computed(() => this.name() === 'chef-2');
+  readonly isChef3 = computed(() => this.name() === 'chef-3');
+  readonly isChef4 = computed(() => this.name() === 'chef-4');
 
   private toCssSize(value: string | number): string {
     return typeof value === 'number' ? `${value}px` : value;

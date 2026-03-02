@@ -6,7 +6,7 @@
     <div class="cooking-style display-row">
       <div class="portions display-column gap-16">
         <p>How many portions you need?</p>
-        <div class="display-row display-ai-center gap-8">
+        <div class="display-row display-ai-center gap-8" [class.shake]="portionsShake()">
           <button (click)="decreasePortions()"><app-svg-icon name="minus" size="20"></app-svg-icon></button>
           <span class="number display-center-center">{{ portions() }}</span>
           <span>Portions</span>
@@ -15,7 +15,7 @@
       </div>
       <div class="person display-column gap-16">
         <p>How many are cooking?</p>
-        <div class="display-row display-ai-center gap-8">
+        <div class="display-row display-ai-center gap-8" [class.shake]="personsShake()">
           <button (click)="decreasePersons()"><app-svg-icon name="minus" size="20"></app-svg-icon></button>
           <span class="number display-center-center">{{ persons() }}</span>
           <span>Person(s)</span>

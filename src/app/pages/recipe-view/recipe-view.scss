@@ -1,0 +1,147 @@
+@import '../../../styles.scss';
+
+:host {
+    display: block;
+}
+
+.recipe-view-container {
+    @include recipe-view-container;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(32px, 4vw, 56px);
+}
+
+.recipe-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: clamp(16px, 2.5vw, 32px);
+    background-color: #FAF0E6;
+    border-radius: 20px;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+    }
+}
+
+.left-section {
+    flex: 1;
+}
+
+.right-section {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* ---- Left section ---- */
+
+.recipe-time {
+    span {
+        font-size: clamp(14px, 2.5vw, 18px);
+        color: #396039;
+        font-weight: 500;
+    }
+}
+
+h1 {
+    font-size: clamp(1.5rem, 4vw, 3.5rem);
+    font-weight: 600;
+    color: #1E5515;
+    margin: 0;
+}
+
+.cooking-persons {
+    flex-wrap: wrap;
+}
+
+.cooking-persons-label {
+    font-size: 20px;
+    font-weight: 500;
+    color: #10310B;
+    white-space: nowrap;
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.chef-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 4px;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #10310B;
+}
+
+/* ---- Right section ---- */
+
+.recipe-tag {
+    @include tags-btn-green;
+}
+
+.nutrition-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #10310B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    gap: 4px clamp(16px, 3vw, 32px);
+}
+
+.nutrition-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #396039;
+}
+
+.nutrition-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: #10310B;
+}
+
+/* ---- Full-width sections ---- */
+
+.ingredients-section,
+.directions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    h2 {
+        font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+        font-weight: 600;
+        color: #1E5515;
+    }
+}
+
+.ingredients-list,
+.directions-list {
+    padding-left: 1.25rem;
+
+    li {
+        font-size: clamp(14px, 2vw, 16px);
+        color: #10310B;
+    }
+}
+
+.footer-recipe-view {
+    background-color: #3960391A;
+    border: none;
+    border-radius: 20px;
+    gap: clamp(16px, 2.5vw, 32px);
+    padding: clamp(16px, 2.5vw, 40px) clamp(24px, 3vw, 48px);
+    margin-top: clamp(40px, 4vw, 56px);
+}

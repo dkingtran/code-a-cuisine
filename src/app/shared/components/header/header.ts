@@ -37,7 +37,7 @@ export class HeaderComponent {
   protected readonly backConfig = computed((): BackConfig | null => {
     const url = this.currentUrl();
     if (url.startsWith('/recipe/')) {
-      return { route: '/results', label: 'recipe results' };
+      return { route: '/results', label: 'Recipe results' };
     }
     if (url.startsWith('/cuisine/')) {
       return { route: '/cookbook', label: 'Cookbook' };

@@ -1,4 +1,92 @@
 
 <div class="main-content">
-  <p>recipe-view works!</p>
+  <div class="recipe-view-container">
+    @if (recipe()) {
+
+      <!-- Top: Left + Right info row -->
+      <div class="recipe-header">
+        <div class="left-section display-column gap-12">
+          <!-- Row 1: Cooking time -->
+          <div class="recipe-time display-row gap-4 display-ai-center">
+            <app-svg-icon name="clock" size="20" />
+            <span>Cooking time: {{ recipe()!.time }}min</span>
+          </div>
+
+          <!-- Row 2: Title -->
+          <h1>{{ recipe()!.title }}</h1>
+
+          <!-- Row 3: Cooking persons -->
+          @if (preferencesService.persons() > 0) {
+            <div class="cooking-persons display-row display-ai-center gap-16">
+              <span class="cooking-persons-label">Cooking Person: {{ preferencesService.persons() }}</span>
+              <div class="display-row gap-4">
+                @for (chef of allChefs; track chef; let i = $index) {
+                  @if (i < preferencesService.persons()) {
+                    <span class="chef-tag" [style.background-color]="chefConfig[chef].bgColor">
+                      <app-svg-icon [name]="chef" [size]="22" />
+                      {{ chefConfig[chef].label }}
+                    </span>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="right-section display-column gap-16">
+          <!-- Tags + Likes -->
+          <div class="right-tags display-row gap-8 flex-wrap display-ai-center">
+            @for (tag of recipe()!.tags; track tag) {
+              <span class="recipe-tag">{{ tag }}</span>
+            }
+            @if (recipe()!.likes !== undefined) {
+              <span class="recipe-tag recipe-tag--likes">♥ {{ recipe()!.likes }}</span>
+            }
+          </div>
+
+          <!-- Nutritional information -->
+          @if (recipe()!.nutrition; as n) {
+            <div class="nutrition display-column gap-12">
+              <span class="nutrition-title">Nutritional Information</span>
+              <div class="nutrition-grid">
+                <span class="nutrition-label">Energie</span>
+                <span class="nutrition-label">Protein</span>
+                <span class="nutrition-label">Fat</span>
+                <span class="nutrition-label">Carbs</span>
+                <span class="nutrition-value">{{ n.calories }} kcal</span>
+                <span class="nutrition-value">{{ n.protein }} g</span>
+                <span class="nutrition-value">{{ n.fat }} g</span>
+                <span class="nutrition-value">{{ n.carbs }} g</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Full-width: Ingredients -->
+      <div class="ingredients-section">
+        <h2>Ingredients</h2>
+        <ul class="ingredients-list display-column gap-8">
+          @for (ingredient of recipe()!.ingredients; track ingredient) {
+            <li>{{ ingredient }}</li>
+          }
+        </ul>
+      </div>
+
+      <!-- Full-width: Directions -->
+      <div class="directions-section">
+        <h2>Directions</h2>
+        <ol class="directions-list display-column gap-12">
+          @for (step of recipe()!.instructions; track step) {
+            <li>{{ step }}</li>
+          }
+        </ol>
+      </div>
+
+    }
+  </div>
+  <div class="footer-recipe-view display-row display-center-center">
+    <p>Find inspiration for your next culinary adventure!</p>
+    <a routerLink="/cookbook" class="primary-btn-green">Cookbook</a>
+  </div>
 </div>
