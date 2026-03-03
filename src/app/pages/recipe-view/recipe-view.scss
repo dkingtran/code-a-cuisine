@@ -11,6 +11,12 @@
     gap: clamp(32px, 4vw, 56px);
 }
 
+.recipe-body {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 3vw, 40px);
+}
+
 .recipe-header {
     display: flex;
     flex-direction: row;
@@ -151,6 +157,38 @@ h1 {
 }
 
 
+/* ---- Collapse button (mobile only) ---- */
+
+.collapse-btn {
+    display: none;
+    font-family: inherit;
+
+    @media (max-width: 600px) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        align-self: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px 12px;
+        font-size: 16px;
+        font-weight: 500;
+        color: #396039;
+    }
+}
+
+.collapse-icon {
+    display: block;
+    transition: transform 0.3s ease;
+    line-height: 0;
+
+    &.rotated {
+        transform: rotate(180deg);
+    }
+}
+
 /* ---- Full-width sections ---- */
 
 .ingredients-section,
@@ -207,7 +245,7 @@ h1 {
     gap: clamp(40px, 6vw, 80px);
 
     @media (max-width: 600px) {
-        grid-template-columns: 1fr;
+        grid-template-columns: auto;
     }
 }
 
@@ -238,19 +276,20 @@ h1 {
 
 .directions-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(16px, 2vw, 28px) clamp(24px, 4vw, 56px);
+    grid-template-columns: repeat(2, auto);
+    justify-content: center;
+    gap: clamp(16px, 2vw, 28px) clamp(24px, 4vw, 64px);
 
-    @media (max-width: 768px) {
-        grid-template-columns: 1fr;
+    @media (max-width: 1080px) {
+        grid-template-columns: auto;
     }
 }
 
 .direction-item {
     display: flex;
     flex-direction: column;
+    max-width: 400px;
     gap: clamp(16px, 2vw, 32px);
-    padding: clamp(12px, 1.5vw, 20px);
     border-radius: 12px;
 }
 
@@ -302,4 +341,39 @@ h1 {
     gap: clamp(16px, 2.5vw, 32px);
     padding: clamp(16px, 2.5vw, 40px) clamp(24px, 3vw, 48px);
     margin-top: clamp(40px, 4vw, 56px);
+
+    @media (max-width: 400px) {
+        flex-direction: column;
+    }
+}
+
+.recipe-footer-container {
+    font-family: 'mulish', sans-serif;
+    gap: clamp(16px, 2vw, 24px);
+
+    .footer-text {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: #10310B;
+
+        span:first-child {
+            font-size: clamp(18px, 2vw, 20px);
+            font-weight: 700;
+        }
+
+        @media (max-width: 860px) {
+            flex-direction: column;
+            gap: 8px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        span {
+            font-family: 'quicksand', sans-serif;
+        }
+    }
 }

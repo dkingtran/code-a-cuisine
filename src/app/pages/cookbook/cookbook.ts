@@ -1,16 +1,21 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Cuisine } from '../../shared/models/recipe.model';
+import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 
 @Component({
   selector: 'app-cookbook',
   standalone: true,
+  imports: [SvgIconComponent],
   templateUrl: './cookbook.html',
   styleUrl: './cookbook.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CookbookComponent {
   private readonly router = inject(Router);
+
+  liked = signal(false);
+  toggleLike(): void { this.liked.update(v => !v); }
 
   cuisines = signal<Cuisine[]>([
     { type: 'italian', name: 'Italian Cuisine', imageUrl: 'https://example.com/italian.jpg' },

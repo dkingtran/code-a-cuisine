@@ -1,26 +1,28 @@
-.cuisine-card {
-    border: 1px solid #ddd;
-    padding: 1rem;
-    margin: 1rem 0;
+@import '../../../styles.scss';
+
+:host {
+    display: block;
 }
 
-.btn {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    background: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-}
+.cookbook-header {
+    border-radius: 20px;
+    background-color: #3960390A;
+    padding: clamp(24px, 2.5vw, 40px) clamp(16px, 3vw, 24px);
 
-.generate-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 1rem 2rem;
-    background: #28a745;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    font-weight: bold;
+    .left-section {
+
+        h1 {
+            font-size: clamp(40px, 5vw, 64px);
+            font-weight: 700;
+            color: #1E5515;
+        }
+
+        p {
+            font-size: clamp(18px, 3vw, 24px);
+            color: #396039;
+        }
+    }
+
+    .right-section {}
+
 }

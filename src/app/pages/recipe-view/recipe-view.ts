@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RecipeService } from '../../shared/services/recipe.service';
 import { Recipe, RecipeDirection } from '../../shared/models/recipe.model';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
@@ -12,8 +12,9 @@ import { PreferencesService, CHEF_CONFIG, ALL_CHEFS } from '../../core/services/
   styleUrl: './recipe-view.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RecipeViewComponent {
+export class RecipeViewComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private recipeService = inject(RecipeService);
   readonly preferencesService = inject(PreferencesService);
 
@@ -21,6 +22,22 @@ export class RecipeViewComponent {
   readonly allChefs = ALL_CHEFS;
 
   recipe = signal<Recipe | null>(null);
+  ingredientsCollapsed = signal(false);
+  directionsCollapsed = signal(false);
+  liked = signal(false);
+
+  toggleLike(): void { this.liked.update(v => !v); }
+
+  private readonly onResize = () => {
+    if (window.innerWidth > 600) {
+      this.ingredientsCollapsed.set(false);
+      this.directionsCollapsed.set(false);
+    }
+  };
+
+  toggleIngredients(): void { this.ingredientsCollapsed.update(v => !v); }
+  toggleDirections(): void { this.directionsCollapsed.update(v => !v); }
+  goToGenerate(): void { void this.router.navigate(['/generate']); }
 
   /** Groups directions into rows of `persons` columns for the grid layout. */
   readonly directionPairs = computed(() => {
@@ -35,9 +52,15 @@ export class RecipeViewComponent {
   });
 
   ngOnInit() {
+    window.addEventListener('resize', this.onResize);
     const id = this.route.snapshot.paramMap.get('id');
+    const state = history.state as { recipe?: Recipe };
+    if (state?.recipe) {
+      this.recipe.set(state.recipe);
+      return;
+    }
     if (id) {
-      // TODO: Load from service
+      // TODO: MOCK DATA – delete once n8n delivers real recipes (replace with recipeService.getRecipeById(id))
       this.recipe.set({
         id,
         number: 1,
@@ -58,5 +81,9 @@ export class RecipeViewComponent {
         nutrition: { calories: 630, protein: 28, fat: 18, carbs: 74 },
       });
     }
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.onResize);
   }
 }

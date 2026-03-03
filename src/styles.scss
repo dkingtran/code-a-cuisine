@@ -8,6 +8,11 @@
     src: url('assets/fonts/Ubuntu-Regular.ttf') format('truetype');
 }
 
+@font-face {
+    font-family: 'mulish';
+    src: url('assets/fonts/Mulish-VariableFont_wght.ttf') format('truetype');
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -235,6 +240,40 @@ a {
     }
 }
 
+.action-forward-btn {
+    @include flex-layout(row, center, center);
+    gap: 10px;
+    width: fit-content;
+    margin-left: auto;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: transparent;
+    color: #1E5515;
+    text-decoration: none;
+    font-family: 'quicksand', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.125s ease;
+    margin-top: clamp(40px, 4vw, 56px);
+
+    &:hover {
+        transform: scale(1.02);
+    }
+
+    img,
+    svg {
+        width: 22px;
+        height: 15px;
+        display: block;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+        margin: clamp(40px, 4vw, 56px) auto;
+    }
+}
+
 .display-center-center {
     display: flex;
     align-items: center;
@@ -316,4 +355,26 @@ a {
 
 .main-content {
     padding: 0 clamp(1rem, 5vw, 4.25rem);
+    margin-bottom: clamp(40px, 4vw, 56px);
+}
+
+.like-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+
+    &:hover {
+        transform: scale(1.10);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
 }
