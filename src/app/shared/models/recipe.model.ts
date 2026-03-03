@@ -5,6 +5,11 @@ export interface RecipeNutrition {
     carbs: number;
 }
 
+export interface RecipeDirection {
+    title: string;
+    text: string;
+}
+
 export interface Recipe {
     id: string;
     number: number;
@@ -12,7 +17,7 @@ export interface Recipe {
     description: string;
     ingredients: string[];
     extraIngredients?: string[];
-    instructions: string[];
+    directions: RecipeDirection[];
     cuisine: string;
     time: number;
     imageUrl?: string;

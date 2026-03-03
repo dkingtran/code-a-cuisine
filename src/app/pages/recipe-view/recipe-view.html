@@ -107,11 +107,48 @@
           <div class="banner-img banner-img--mobile"><app-svg-icon name="banner-directions-mobile" /></div>
           <h2>Directions</h2>
         </div>
-        <ol class="directions-list display-column gap-12">
-          @for (step of recipe()!.instructions; track step) {
-            <li>{{ step }}</li>
-          }
-        </ol>
+
+        @if (directionPairs(); as pairs) {
+          <!-- Multi-chef grid -->
+          <div class="directions-grid">
+            @for (pair of pairs; track $index; let pairIndex = $index) {
+              @for (direction of pair; track $index; let colIndex = $index) {
+                <div class="direction-item">
+                  <div class="direction-header">
+                    <span class="direction-step">{{ pairIndex * preferencesService.persons() + colIndex + 1 }}.</span>
+                    <h4>{{ direction.title }}</h4>
+                    <span class="chef-tag" [style.background-color]="chefConfig[allChefs[colIndex]].bgColor">
+                      <app-svg-icon [name]="allChefs[colIndex]"
+                        [width]="chefConfig[allChefs[colIndex]].iconWidth"
+                        [height]="chefConfig[allChefs[colIndex]].iconHeight" />
+                      {{ chefConfig[allChefs[colIndex]].label }}
+                    </span>
+                  </div>
+                  <p class="direction-text">{{ direction.text }}</p>
+                </div>
+              }
+            }
+          </div>
+        } @else {
+          <!-- Single-person grid -->
+          <div class="directions-grid">
+            @for (direction of recipe()!.directions; track direction; let i = $index) {
+              <div class="direction-item">
+                <div class="direction-header">
+                  <span class="direction-step">{{ i + 1 }}.</span>
+                  <h4>{{ direction.title }}</h4>
+                  <span class="chef-tag" [style.background-color]="chefConfig[allChefs[i % 2]].bgColor">
+                    <app-svg-icon [name]="allChefs[i % 2]"
+                      [width]="chefConfig[allChefs[i % 2]].iconWidth"
+                      [height]="chefConfig[allChefs[i % 2]].iconHeight" />
+                    {{ chefConfig[allChefs[i % 2]].label }}
+                  </span>
+                </div>
+                <p class="direction-text">{{ direction.text }}</p>
+              </div>
+            }
+          </div>
+        }
       </div>
 
     }

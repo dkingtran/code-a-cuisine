@@ -214,24 +214,85 @@ h1 {
 .ingredients-column {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 
     h3 {
-        font-size: clamp(16px, 2vw, 20px);
+        font-size: clamp(18px, 2vw, 24px);
         font-weight: 600;
-        color: #1E5515;
+        color: #008000;
         margin: 0;
     }
 }
 
-.ingredients-list,
-.directions-list {
-    padding-left: 1.25rem;
+.ingredients-list {
+    padding-left: 2rem;
 
     li {
-        font-size: clamp(14px, 2vw, 16px);
+        font-size: clamp(16px, 2vw, 24px);
+        font-weight: 500;
         color: #10310B;
     }
+}
+
+/* ---- Directions grid (multi-chef) ---- */
+
+.directions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(16px, 2vw, 28px) clamp(24px, 4vw, 56px);
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.direction-item {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 2vw, 32px);
+    padding: clamp(12px, 1.5vw, 20px);
+    border-radius: 12px;
+}
+
+.direction-step {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background-color: #FAF0E6;
+    border-radius: 31.5px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #10310B;
+}
+
+.direction-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+
+    h4 {
+        font-size: clamp(18px, 1.6vw, 24px);
+        font-weight: 500;
+        color: #10310B;
+        margin: 0;
+    }
+
+    .chef-tag {
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+}
+
+.direction-text {
+    font-size: clamp(16px, 2vw, 18px);
+    font-weight: 500;
+    color: #10310B;
+    margin: 0;
+    line-height: 1.6;
 }
 
 .footer-recipe-view {

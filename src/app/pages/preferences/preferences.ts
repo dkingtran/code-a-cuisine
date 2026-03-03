@@ -18,7 +18,7 @@ export class PreferencesComponent {
   private readonly loadingService = inject(LoadingService);
   private readonly preferencesService = inject(PreferencesService);
 
-  readonly portions = signal(4);
+  readonly portions = signal(2);
   readonly portionsShake = signal(false);
   readonly persons = signal(1);
   readonly personsShake = signal(false);
@@ -33,7 +33,7 @@ export class PreferencesComponent {
   }
 
   increasePortions() {
-    if (this.portions() >= 99) { this.portionsShake.set(true); setTimeout(() => this.portionsShake.set(false), 400); return; }
+    if (this.portions() >= 12) { this.portionsShake.set(true); setTimeout(() => this.portionsShake.set(false), 400); return; }
     this.portions.update(p => p + 1);
   }
 
