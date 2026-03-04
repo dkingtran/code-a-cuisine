@@ -6,7 +6,7 @@
       <p>From quick bites to gourmet delights, explore them all in our ultimate cookbook and get inspired for your next culinary adventure.</p>
     </div>
     <div class="right-section display-column gap-16 ">
-      <div class="display-row gap-16">
+      <div class="display-ai-center display-row gap-16">
         <h2>
           Most liked recipes
         </h2>
@@ -20,7 +20,45 @@
           </svg>
         </button> 
       </div>
+      <div
+        class="recipe-scroll"
+        #recipeScroll
+        role="list"
+        aria-label="Most liked recipes"
+        (mousedown)="onMouseDown($event)"
+        (mousemove)="onMouseMove($event)"
+        (mouseup)="onMouseUp()"
+        (mouseleave)="onMouseUp()"
+      >
+        @for (recipe of recipes(); track recipe.id) {
+          <div role="listitem" (click)="navigateToRecipe(recipe)">
+            <app-recipe-card [recipe]="recipe" />
+          </div>
+        }
+      </div>
     </div>
+  </div>
+  <div class="cuisine-grid">
+    @for (cuisine of cuisines(); track cuisine.type) {
+      <div
+        class="cuisine-card"
+        (click)="goToCuisine(cuisine.type)"
+        (keydown.enter)="goToCuisine(cuisine.type)"
+        (keydown.space)="goToCuisine(cuisine.type)"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="'Explore ' + cuisine.name"
+      >
+        <h3 class="cuisine-card__title">{{ cuisine.name }} <span class="cuisine-card__emoji">{{ cuisine.emoji }}</span></h3>
+        <div class="cuisine-card__image-wrapper">
+          <img
+            [ngSrc]="cuisine.imageUrl"
+            [alt]="cuisine.name"
+            fill
+          />
+        </div>
+      </div>
+    }
   </div>
 
 <button type="button" class="action-forward-btn" (click)="goToGenerate()">

@@ -30,4 +30,5 @@ export interface Cuisine {
     type: string;
     name: string;
     imageUrl: string;
+    emoji: string;
 }

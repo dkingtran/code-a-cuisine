@@ -1,0 +1,16 @@
+<article class="recipe-card" [attr.aria-label]="recipe().title">
+  @if (recipe().likes !== undefined) {
+    <span class="recipe-tag recipe-tag--likes" [attr.aria-label]="recipe().likes + ' likes'">
+      <app-svg-icon name="heart" size="18" />
+      {{ recipe().likes }}
+    </span>
+  }
+  <div class="recipe-card__content">
+    <div class="recipe-card__time">
+      <app-svg-icon name="clock" [width]="16" [height]="16" aria-hidden="true" />
+      <span>Cooking time: {{ recipe().time }} min</span>
+    </div>
+    <h2 class="recipe-card__title">{{ recipe().title }}</h2>
+  </div>
+</article>
+
