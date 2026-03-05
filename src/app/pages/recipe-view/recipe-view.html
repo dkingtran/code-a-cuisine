@@ -168,7 +168,7 @@
         </button>
       </div>
       <div class="recipe-footer-container display-row display-center-center">
-        <p class="footer-text"><span>Just finished this meal?</span><span>Give it a heart, so that the others know this is delicious.</span></p>
+        <p class="footer-text display-ai-center"><span>Just finished this meal?</span><span>Give it a heart, so that the others know this is delicious.</span></p>
         <button class="like-btn" type="button" (click)="toggleLike()" [class.liked]="liked()" [attr.aria-label]="liked() ? 'Remove like' : 'Like this recipe'" [attr.aria-pressed]="liked()">
           <svg width="40" height="36" viewBox="0 0 40 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             @if (liked()) {

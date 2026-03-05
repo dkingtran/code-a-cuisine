@@ -32,6 +32,9 @@ export class ResultsComponent implements OnInit, OnDestroy {
     void this.router.navigate(['/generate']);
   }
 
+  // TODO: Replace with tags returned from n8n
+  tags = signal<string[]>(['Italian', 'Quick']);
+
   // TODO: MOCK DATA – delete once n8n delivers real recipes
   recipes = signal<Recipe[]>([
     {

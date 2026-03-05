@@ -4,7 +4,11 @@
       <h1 class="desktop-view">The recipe results</h1>
       <h1 class="mobile-view">Generated recipes</h1>
       <p>We took what you have and let our AI do the thinking. Here are 3 easy recipes you can make right now!</p>
-      <div class="tags">(tags btn, zum Beispiel: italian und quick)</div>
+      <div class="tags">
+        @for (tag of tags(); track tag) {
+          <button type="button" class="tag-btn">{{ tag }}</button>
+        }
+      </div>
     </div>
     <div class="header-right">
       <div class="header-img">
