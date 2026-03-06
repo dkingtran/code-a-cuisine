@@ -49,7 +49,7 @@
         tabindex="0"
         [attr.aria-label]="'Explore ' + cuisine.name"
       >
-        <h3 class="cuisine-card__title">{{ cuisine.name }} <span class="cuisine-card__emoji">{{ cuisine.emoji }}</span></h3>
+        <h3 class="cuisine-card__title">{{ cuisine.name }} <img class="cuisine-card__icon" [src]="cuisine.iconUrl" [alt]="cuisine.name + ' icon'" aria-hidden="true"></h3>
         <div class="cuisine-card__image-wrapper">
           <img
             [ngSrc]="cuisine.imageUrl"

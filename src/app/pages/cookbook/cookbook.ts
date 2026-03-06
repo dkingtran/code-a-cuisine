@@ -70,12 +70,12 @@ export class CookbookComponent {
   }
 
   cuisines = signal<Cuisine[]>([
-    { type: 'italian', name: 'Italian Cuisine', imageUrl: 'assets/img/cookbook/italian.png', emoji: '🍝' },
-    { type: 'german', name: 'German Cuisine', imageUrl: 'assets/img/cookbook/german.png', emoji: '🥨' },
-    { type: 'japanese', name: 'Japanese Cuisine', imageUrl: 'assets/img/cookbook/japanese.png', emoji: '🍱' },
-    { type: 'gourmet', name: 'Gourmet Cuisine', imageUrl: 'assets/img/cookbook/gourmet.png', emoji: '⭐' },
-    { type: 'indian', name: 'Indian Cuisine', imageUrl: 'assets/img/cookbook/indian.png', emoji: '🍛' },
-    { type: 'fusion', name: 'Fusion Cuisine', imageUrl: 'assets/img/cookbook/fusion.png', emoji: '🌐' },
+    { type: 'italian', name: 'Italian Cuisine', imageUrl: 'assets/img/cookbook/italian.png', iconUrl: 'assets/img/cookbook/icon/italian.png' },
+    { type: 'german', name: 'German Cuisine', imageUrl: 'assets/img/cookbook/german.png', iconUrl: 'assets/img/cookbook/icon/german.png' },
+    { type: 'japanese', name: 'Japanese Cuisine', imageUrl: 'assets/img/cookbook/japanese.png', iconUrl: 'assets/img/cookbook/icon/japanese.png' },
+    { type: 'gourmet', name: 'Gourmet Cuisine', imageUrl: 'assets/img/cookbook/gourmet.png', iconUrl: 'assets/img/cookbook/icon/gourmet.png' },
+    { type: 'indian', name: 'Indian Cuisine', imageUrl: 'assets/img/cookbook/indian.png', iconUrl: 'assets/img/cookbook/icon/indian.png' },
+    { type: 'fusion', name: 'Fusion Cuisine', imageUrl: 'assets/img/cookbook/fusion.png', iconUrl: 'assets/img/cookbook/icon/fusion.png' },
   ]);
 
   recipes = signal<Recipe[]>([
