@@ -9,8 +9,17 @@
     background-color: #3960390A;
     padding: clamp(24px, 2.5vw, 40px) clamp(16px, 3vw, 24px);
 
+    @media (max-width: 1080px) {
+        flex-direction: column;
+        gap: 24px;
+    }
+
     .left-section {
         min-width: 454px;
+
+        @media (max-width: 1080px) {
+            min-width: 0;
+        }
 
         h1 {
             font-size: clamp(40px, 5vw, 64px);
@@ -29,7 +38,7 @@
         min-width: 0;
 
         h2 {
-            font-size: 24px;
+            font-size: clamp(20px, 3vw, 24px);
             font-weight: 600;
             color: #1E5515;
         }
@@ -56,7 +65,11 @@
 
             >div {
                 scroll-snap-align: start;
-                flex: 0 0 370px;
+                flex: 0 0 clamp(280px, 37vw, 370px);
+
+                @media (max-width: 440px) {
+                    flex: 0 0 clamp(220px, 65vw, 280px);
+                }
             }
         }
     }

@@ -2,13 +2,17 @@
 
 :host {
     display: block;
-    flex: 0 0 370px;
+    flex: 0 0 clamp(280px, 37vw, 370px);
     height: 100%;
+
+    @media (max-width: 440px) {
+        flex: 0 0 clamp(220px, 65vw, 280px);
+    }
 }
 
 .recipe-card {
     position: relative;
-    width: 370px;
+    width: 100%;
     height: 100%;
     min-height: 124px;
     border-radius: 16px;
@@ -34,6 +38,7 @@
         flex-direction: column;
         gap: 8px;
         width: 258px;
+        padding-top: 4px;
     }
 
     &__time {
@@ -43,6 +48,12 @@
         color: #396039;
         font-size: 16px;
         font-weight: 500;
+
+        ::ng-deep svg {
+            flex-shrink: 0;
+            min-width: 16px;
+            min-height: 16px;
+        }
     }
 
     &__title {
@@ -50,5 +61,35 @@
         font-weight: 500;
         color: #1E5515;
         overflow: hidden;
+    }
+
+    @media (max-width: 1080px) {
+        flex-direction: row;
+
+        .recipe-tag {
+            position: static;
+            flex-shrink: 0;
+            order: 2;
+        }
+
+        &__content {
+            flex: 1 1 0;
+            min-width: 0;
+            width: auto;
+            order: 1;
+        }
+    }
+
+    @media (max-width: 440px) {
+        flex-direction: column;
+        width: clamp(220px, 65vw, 280px);
+    }
+}
+
+.recipe-tag {
+    width: fit-content;
+
+    @media (max-width: 440px) {
+        gap: 2px;
     }
 }

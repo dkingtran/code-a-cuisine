@@ -1,4 +1,94 @@
-
 <div class="main-content">
-  <p>cuisine-recipes works!</p>
+
+  <!-- 1. Generate button -->
+  <div class="cuisine-top-row">
+    <button type="button" class="primary-btn-green" (click)="goToGenerate()">
+      Generate a recipe
+    </button>
+  </div>
+
+  <!-- 2. Cuisine banner -->
+  <div class="cuisine-banner">
+    <div class="cuisine-banner__wrapper cuisine-banner__wrapper--desktop">
+      <img [src]="desktopBannerUrl()" [alt]="cuisineName() + ' banner'" />
+    </div>
+    <div class="cuisine-banner__wrapper cuisine-banner__wrapper--mobile">
+      <img [src]="mobileBannerUrl()" [alt]="cuisineName() + ' banner'" />
+    </div>
+    <h2 class="cuisine-banner__title">{{ cuisineName() }}</h2>
+  </div>
+
+  <!-- 3. Recipe list -->
+  <ul
+    class="cuisine-recipe-list"
+    role="list"
+    [attr.aria-label]="cuisineName() + ' recipes'"
+  >
+    @for (recipe of recipes(); track recipe.id) {
+      <li
+        class="cuisine-recipe-item"
+        role="listitem"
+        (click)="navigateToRecipe(recipe.id)"
+        (keydown.enter)="navigateToRecipe(recipe.id)"
+        (keydown.space)="navigateToRecipe(recipe.id)"
+        tabindex="0"
+        [attr.aria-label]="'Open recipe: ' + recipe.title"
+      >
+        <span class="cuisine-recipe-item__number">{{ recipe.number }}.</span>
+
+        <div class="cuisine-recipe-item__time">
+          <app-svg-icon name="clock" [width]="16" [height]="16" aria-hidden="true" />
+          <span>Cooking time: {{ recipe.time }} min</span>
+        </div>
+
+        <h3 class="cuisine-recipe-item__title">{{ recipe.title }}</h3>
+
+        <div class="cuisine-recipe-item__tags">
+          @for (tag of recipe.tags; track tag) {
+            <span class="recipe-tag">{{ tag }}</span>
+          }
+          @if (recipe.likes !== undefined) {
+            <span class="recipe-tag recipe-tag--likes">
+              <app-svg-icon name="heart" size="18" />
+              {{ recipe.likes }}
+            </span>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+
+  <!-- 4. Pagination -->
+  <nav class="pagination" aria-label="Page navigation">
+    <button
+      class="pagination__btn"
+      [disabled]="currentPage() === 1"
+      (click)="goToPage(currentPage() - 1)"
+      aria-label="Previous page"
+    >
+      <app-svg-icon name="back-btn-green" [width]="22" [height]="15" />
+    </button>
+
+    @for (page of pages(); track page) {
+      <button
+        class="pagination__btn pagination__btn--number"
+        [class.pagination__btn--active]="page === currentPage()"
+        (click)="goToPage(page)"
+        [attr.aria-label]="'Page ' + page"
+        [attr.aria-current]="page === currentPage() ? 'page' : null"
+      >
+        {{ page }}
+      </button>
+    }
+
+    <button
+      class="pagination__btn"
+      [disabled]="currentPage() === totalPages()"
+      (click)="goToPage(currentPage() + 1)"
+      aria-label="Next page"
+    >
+      <app-svg-icon name="forward-btn-green" [width]="26" [height]="15" />
+    </button>
+  </nav>
+
 </div>

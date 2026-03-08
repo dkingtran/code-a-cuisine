@@ -142,6 +142,7 @@ a {
 
 .primary-btn-creme {
     font-weight: 600;
+    font-size: clamp(16px, 2vw, 24px);
     font-family: 'quicksand', sans-serif;
     color: #008000;
     background-color: #FAF0E6;
