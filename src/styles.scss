@@ -83,6 +83,32 @@ a {
     }
 }
 
+@mixin pagination-btn {
+    font-family: 'quicksand', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2px;
+    padding: 8px;
+    height: 27px;
+    border: none;
+    background-color: transparent;
+    color: #10310B;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+        background-color: #C4D0C466;
+    }
+
+    &:active {
+        color: #10310B;
+        background-color: #C4D0C4;
+    }
+}
+
 @mixin flex-layout($direction: row, $align: null, $justify: null) {
     display: flex;
     flex-direction: $direction;

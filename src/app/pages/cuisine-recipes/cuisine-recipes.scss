@@ -7,13 +7,19 @@
 .main-content {
     display: flex;
     flex-direction: column;
-    gap: clamp(24px, 3vw, 40px);
+    gap: clamp(40px, 6vw, 96px);
 }
 
 // 1. Generate button row
 .cuisine-top-row {
     display: flex;
     justify-content: flex-end;
+    margin-bottom: calc(32px - clamp(40px, 6vw, 96px));
+
+    @media (max-width: 600px) {
+        order: 5;
+        margin: 0 auto;
+    }
 }
 
 .generate-btn {
@@ -22,39 +28,32 @@
     gap: 8px;
 }
 
+.banner-img--mobile {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .banner-img--desktop {
+        display: none;
+    }
+
+    .banner-img--mobile {
+        display: block;
+    }
+}
+
 // 2. Banner
 .cuisine-banner {
     position: relative;
     border-radius: 16px;
     overflow: hidden;
+    max-width: 1140px;
+    margin: 0 auto;
 
-    &__wrapper {
-        position: relative;
+    img {
         width: 100%;
-
-        &--desktop {
-            height: clamp(160px, 20vw, 280px);
-
-            @media (max-width: 480px) {
-                display: none;
-            }
-        }
-
-        &--mobile {
-            display: none;
-            height: clamp(200px, 60vw, 360px);
-
-            @media (max-width: 480px) {
-                display: block;
-            }
-        }
-
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
+        height: auto;
+        display: block;
     }
 
     &__title {
@@ -77,7 +76,11 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 8px;
+
+    @media (max-width: 600px) {
+        gap: 32px;
+    }
 }
 
 .cuisine-recipe-item {
@@ -87,11 +90,11 @@
     grid-template-areas:
         "num time  tags"
         "num title tags";
-    column-gap: 16px;
+    column-gap: 2px;
     row-gap: 2px;
-    padding: clamp(12px, 2vw, 20px) clamp(12px, 2vw, 24px);
+    padding: 6px 10px;
     cursor: pointer;
-    width: 900px;
+    width: min(900px, 100%);
     margin: 0 auto;
     border-radius: 16px;
     transition: background-color 0.15s ease;
@@ -108,6 +111,7 @@
     &__number {
         grid-area: num;
         align-self: end;
+        justify-self: center;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -119,6 +123,10 @@
         background-color: #F6E3CF;
         border-radius: 50%;
         flex-shrink: 0;
+
+        @media (max-width: 600px) {
+            justify-self: start;
+        }
     }
 
     &__time {
@@ -137,13 +145,19 @@
 
     &__title {
         grid-area: title;
-        font-size: clamp(16px, 2vw, 20px);
+        font-size: clamp(18px, 2vw, 24px);
         font-weight: 500;
         color: #1E5515;
         margin: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        @media (max-width: 600px) {
+            margin-top: 2px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
     }
 
     &__tags {
@@ -152,6 +166,7 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
+        font-size: clamp(16px, 1.5vw, 18px);
         gap: 6px;
         justify-content: flex-end;
     }
@@ -164,6 +179,10 @@
             "title title"
             "tags  tags";
 
+        &:nth-child(even) {
+            background-color: #FAF0E6B2;
+        }
+
         &__tags {
             justify-content: flex-start;
         }
@@ -172,7 +191,7 @@
 
 .recipe-tag {
     @include tags-btn-green;
-    font-size: 18px;
+    font-size: clamp(16px, 1.5vw, 18px);
     gap: 2px;
 
     &--likes {
@@ -184,23 +203,49 @@
 
 // 4. Pagination
 .pagination {
-    margin-top: clamp(40px, 6vw, 96px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 24px;
 
-    &__btn {
-        @include tags-btn-green;
-        cursor: pointer;
-        font-size: 16px;
+    &__pages {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    &__arrow {
+        display: flex;
+        align-items: center;
+    }
+
+    &__ellipsis {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        min-width: 32px;
+        font-size: 16px;
+        letter-spacing: 110%;
+        color: #396039;
+        user-select: none;
+    }
+
+    &__btn {
+        @include pagination-btn;
+
+        &--arrow {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+        }
 
         &--active {
-            background-color: #396039;
-            color: #FAF0E6;
+            color: #10310B;
+            background-color: #C4D0C4;
+
+            &:hover {
+                background-color: #C4D0C4;
+            }
         }
 
         &:disabled {
