@@ -1,7 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { filter, map } from 'rxjs';
 import { ThemeService } from '../../../core/services/theme.service';
 import { SvgIconComponent } from '../svg-icon/svg-icon';
 
@@ -26,18 +24,25 @@ export class HeaderComponent {
   private readonly router = inject(Router);
   protected readonly themeService = inject(ThemeService);
 
-  private readonly currentUrl = toSignal(
-    this.router.events.pipe(
-      filter(e => e instanceof NavigationEnd),
-      map(e => (e as NavigationEnd).urlAfterRedirects)
-    ),
-    { initialValue: this.router.url }
-  );
+  private readonly previousUrl = signal<string>('');
+  private readonly currentUrl = signal<string>(this.router.url);
+
+  constructor() {
+    this.router.events.subscribe(e => {
+      if (e instanceof NavigationEnd) {
+        this.previousUrl.set(this.currentUrl());
+        this.currentUrl.set(e.urlAfterRedirects);
+      }
+    });
+  }
 
   protected readonly backConfig = computed((): BackConfig | null => {
     const url = this.currentUrl();
     if (url.startsWith('/recipe/')) {
-      return { route: '/results', label: 'Recipe results' };
+      const fromCookbook = this.previousUrl().startsWith('/cookbook');
+      return fromCookbook
+        ? { route: '/cookbook', label: 'Back to the cookbook' }
+        : { route: '/results', label: 'Back to recipe results' };
     }
     if (url.startsWith('/cuisine/')) {
       return { route: '/cookbook', label: 'Cookbook' };

@@ -150,7 +150,7 @@ a {
 
 .primary-btn-green {
     font-weight: 600;
-    font-size: clamp(16px, 2vw, 24px);
+    font-size: clamp(16px, 3vw, 24px);
     font-family: 'quicksand', sans-serif;
     color: #FAF0E6;
     background-color: #396039;
@@ -168,7 +168,7 @@ a {
 
 .primary-btn-creme {
     font-weight: 600;
-    font-size: clamp(16px, 2vw, 24px);
+    font-size: clamp(16px, 3vw, 24px);
     font-family: 'quicksand', sans-serif;
     color: #008000;
     background-color: #FAF0E6;
@@ -384,7 +384,7 @@ a {
 }
 
 .main-content {
-    padding: 0 clamp(1rem, 5vw, 4.25rem);
+    padding: 0 clamp(0.5rem, 3vw, 4.25rem);
     margin-bottom: clamp(40px, 4vw, 56px);
 }
 

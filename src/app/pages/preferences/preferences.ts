@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, ElementRef, viewChild, Injector, afterNextRender } from '@angular/core';
 import { Router } from '@angular/router';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 import { RecipeService } from '../../shared/services/recipe.service';
@@ -17,6 +17,11 @@ export class PreferencesComponent {
   private readonly recipeService = inject(RecipeService);
   private readonly loadingService = inject(LoadingService);
   private readonly preferencesService = inject(PreferencesService);
+  private readonly injector = inject(Injector);
+
+  readonly modalBoxRef = viewChild<ElementRef<HTMLElement>>('modalBox');
+
+  readonly showInsufficientModal = signal(false);
 
   readonly portions = signal(2);
   readonly portionsShake = signal(false);
@@ -81,7 +86,22 @@ export class PreferencesComponent {
       },
       error: () => {
         this.loadingService.hide();
+        this.showInsufficientModal.set(true);
+        document.body.style.overflow = 'hidden';
+        afterNextRender(() => {
+          this.modalBoxRef()?.nativeElement.focus();
+        }, { injector: this.injector });
       },
     });
+  }
+
+  closeModal(): void {
+    this.showInsufficientModal.set(false);
+    document.body.style.overflow = '';
+  }
+
+  goBackToIngredients(): void {
+    this.closeModal();
+    void this.router.navigate(['/generate-recipe']);
   }
 }

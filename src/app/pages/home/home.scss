@@ -133,10 +133,6 @@
     }
 }
 
-.primary-btn-creme {
-    font-size: clamp(1rem, 1.5vw, 1.5rem);
-}
-
 .bottom-text {
     @include flex-layout(row, center, center);
     gap: 16px;
