@@ -1,8 +1,17 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Recipe, Cuisine } from '../models/recipe.model';
 import { LoggerService } from '../../core/services/logger.service';
+
+interface StoredIngredient {
+  id: number;
+  name: string;
+  amount: string;
+  unit: 'gram' | 'ml' | 'piece';
+}
+
+const INGREDIENTS_KEY = 'cac_ingredients';
 
 @Injectable({
   providedIn: 'root'
@@ -11,10 +20,11 @@ export class RecipeService {
   private http = inject(HttpClient);
   private logger = inject(LoggerService);
 
-  // Mock data for now, replace with actual n8n API calls
+  readonly generatedRecipes = signal<Recipe[]>([]);
+  readonly generatedTags = signal<string[]>([]);
+
   getRecipes(): Observable<Recipe[]> {
     this.logger.log('Fetching recipes');
-    // TODO: Integrate with n8n API
     return this.http.get<Recipe[]>('/api/recipes');
   }
 
@@ -33,9 +43,23 @@ export class RecipeService {
     return this.http.get<Recipe[]>(`/api/cuisines/${type}/recipes`);
   }
 
-  generateRecipe(preferences: any): Observable<Recipe[]> {
+  generateRecipe(preferences: {
+    portions: number;
+    persons: number;
+    cookingTime: string | null;
+    cuisine: string | null;
+    diet: string | null;
+  }): Observable<Recipe[]> {
     this.logger.log('Generating recipe with preferences');
-    // Call n8n API to generate recipes based on preferences
-    return this.http.post<Recipe[]>('/api/generate', preferences);
+    const raw = localStorage.getItem(INGREDIENTS_KEY);
+    const ingredients: StoredIngredient[] = raw ? JSON.parse(raw) : [];
+    const body = { ...preferences, ingredients };
+    return this.http.post<Recipe[]>('/api/generate', body).pipe(
+      tap(recipes => {
+        this.generatedRecipes.set(recipes);
+        const tags = [...new Set(recipes.flatMap(r => r.tags ?? []))];
+        this.generatedTags.set(tags);
+      })
+    );
   }
 }

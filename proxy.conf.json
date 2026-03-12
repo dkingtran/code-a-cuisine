@@ -1,0 +1,11 @@
+{
+    "/api/generate": {
+        "target": "http://localhost:5678",
+        "secure": false,
+        "pathRewrite": {
+            "^/api/generate": "/webhook-test/935a2f3b-3b9f-4533-bd45-d2f976dcd56e"
+        },
+        "changeOrigin": true,
+        "logLevel": "debug"
+    }
+}
