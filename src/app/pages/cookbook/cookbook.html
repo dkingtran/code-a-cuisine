@@ -18,26 +18,119 @@
               <path d="M20 35.35C19.5333 35.35 19.0583 35.2667 18.575 35.1C18.0917 34.9333 17.6667 34.6667 17.3 34.3L13.85 31.15C10.3167 27.9167 7.125 24.7083 4.275 21.525C1.425 18.3417 0 14.8333 0 11C0 7.86667 1.05 5.25 3.15 3.15C5.25 1.05 7.86667 0 11 0C12.7667 0 14.4333 0.375 16 1.125C17.5667 1.875 18.9 2.9 20 4.2C21.1 2.9 22.4333 1.875 24 1.125C25.5667 0.375 27.2333 0 29 0C32.1333 0 34.75 1.05 36.85 3.15C38.95 5.25 40 7.86667 40 11C40 14.8333 38.5833 18.35 35.75 21.55C32.9167 24.75 29.7 27.9667 26.1 31.2L22.7 34.3C22.3333 34.6667 21.9083 34.9333 21.425 35.1C20.9417 35.2667 20.4667 35.35 20 35.35Z M18.1 8.2C17.1333 6.83333 16.1 5.79167 15 5.075C13.9 4.35833 12.5667 4 11 4C9 4 7.33333 4.66667 6 6C4.66667 7.33333 4 9 4 11C4 12.7333 4.61667 14.575 5.85 16.525C7.08333 18.475 8.55833 20.3667 10.275 22.2C11.9917 24.0333 13.7583 25.75 15.575 27.35C17.3917 28.95 18.8667 30.2667 20 31.3C21.1333 30.2667 22.6083 28.95 24.425 27.35C26.2417 25.75 28.0083 24.0333 29.725 22.2C31.4417 20.3667 32.9167 18.475 34.15 16.525C35.3833 14.575 36 12.7333 36 11C36 9 35.3333 7.33333 34 6C32.6667 4.66667 31 4 29 4C27.4333 4 26.1 4.35833 25 5.075C23.9 5.79167 22.8667 6.83333 21.9 8.2C21.6667 8.53333 21.3833 8.78333 21.05 8.95C20.7167 9.11667 20.3667 9.2 20 9.2C19.6333 9.2 19.2833 9.11667 18.95 8.95C18.6167 8.78333 18.3333 8.53333 18.1 8.2Z" fill="#008000"/>
             }
           </svg>
-        </button> 
+        </button>
       </div>
-      <div
-        class="recipe-scroll"
-        #recipeScroll
-        role="list"
-        aria-label="Most liked recipes"
-        (mousedown)="onMouseDown($event)"
-        (mousemove)="onMouseMove($event)"
-        (mouseup)="onMouseUp()"
-        (mouseleave)="onMouseUp()"
-      >
-        @for (recipe of recipes(); track recipe.id) {
-          <div role="listitem" (click)="navigateToRecipe(recipe)">
-            <app-recipe-card [recipe]="recipe" />
-          </div>
+        @if (loading()) {
+          <p class="recipes-status" aria-live="polite">Loading recipes...</p>
+        } @else if (loadError()) {
+          <p class="recipes-status recipes-status--error" aria-live="polite">Could not load recipes. Please try again later.</p>
+        } @else if (recipes().length === 0) {
+          <p class="recipes-status" aria-live="polite">No recipes yet — generate your first one!</p>
+        } @else {
+        <div
+          class="recipe-scroll"
+          #recipeScroll
+          role="list"
+          aria-label="Most liked recipes"
+          (mousedown)="onMouseDown($event)"
+          (mousemove)="onMouseMove($event)"
+          (mouseup)="onMouseUp()"
+          (mouseleave)="onMouseUp()"
+        >
+          @for (recipe of recipes(); track recipe.id) {
+            <div role="listitem" (click)="navigateToRecipe(recipe)">
+              <app-recipe-card [recipe]="recipe" />
+            </div>
+          }
+        </div>
         }
-      </div>
     </div>
   </div>
+
+  <section class="all-recipes-section" aria-label="All recipes with filters">
+    <div class="all-recipes-header display-row display-ai-center gap-16" [class.expanded]="!allRecipesCollapsed()">
+      <h2>Filter recipes</h2>
+      <button
+        type="button"
+        class="collapse-section-btn"
+        (click)="toggleAllRecipes()"
+        [attr.aria-expanded]="!allRecipesCollapsed()"
+        aria-controls="all-recipes-body">
+        {{ allRecipesCollapsed() ? 'Show' : 'Hide' }}
+        <span class="collapse-section-icon" [class.rotated]="allRecipesCollapsed()">
+          <app-svg-icon name="chevron-up" [width]="14" [height]="8" />
+        </span>
+      </button>
+    </div>
+    @if (!allRecipesCollapsed()) {
+    <div id="all-recipes-body">
+      <div class="filters" role="group" aria-label="Filter recipes">
+        <div class="filter-group">
+          <span class="filter-label"><app-svg-icon name="clock" size="18" />Time</span>
+          <div class="filter-chips">
+            <button type="button" class="tags-btn" [class.selected]="selectedTimeFilter() === 'quick'" (click)="setTimeFilter('quick')" [attr.aria-pressed]="selectedTimeFilter() === 'quick'">Quick (&le;20 min)</button>
+            <button type="button" class="tags-btn" [class.selected]="selectedTimeFilter() === 'medium'" (click)="setTimeFilter('medium')" [attr.aria-pressed]="selectedTimeFilter() === 'medium'">Medium (21–45 min)</button>
+            <button type="button" class="tags-btn" [class.selected]="selectedTimeFilter() === 'complex'" (click)="setTimeFilter('complex')" [attr.aria-pressed]="selectedTimeFilter() === 'complex'">Complex (&gt;45 min)</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label"><app-svg-icon name="globe" size="18" />Cuisine</span>
+          <div class="filter-chips">
+            @for (c of ['Italian','German','Japanese','Indian','Gourmet','Fusion']; track c) {
+              <button
+                type="button"
+                class="tags-btn"
+                [class.selected]="selectedCuisineFilter() === c.toLowerCase()"
+                (click)="setCuisineFilter(c.toLowerCase())"
+                [attr.aria-pressed]="selectedCuisineFilter() === c.toLowerCase()">
+                {{ c }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label"><app-svg-icon name="fork-knife" size="18" />Diet</span>
+          <div class="filter-chips">
+            @for (d of ['Vegetarian','Vegan','Keto']; track d) {
+              <button
+                type="button"
+                class="tags-btn"
+                [class.selected]="selectedDietFilter() === d"
+                (click)="setDietFilter(d)"
+                [attr.aria-pressed]="selectedDietFilter() === d">
+                {{ d }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+      @if (loading()) {
+        <p class="all-recipes-status" aria-live="polite">Loading recipes...</p>
+      } @else if (loadError()) {
+        <p class="all-recipes-status all-recipes-status--error" aria-live="polite">Could not load recipes. Please try again later.</p>
+      } @else if (recipes().length === 0) {
+        <p class="all-recipes-status" aria-live="polite">No recipes yet — generate your first one!</p>
+      } @else if (filteredRecipes().length === 0) {
+        <p class="all-recipes-status" aria-live="polite">No recipes match the selected filters.</p>
+      } @else {
+        <div
+          class="all-recipes-grid"
+          #allRecipesGrid
+          (mousedown)="onMouseDown($event, allRecipesGrid)"
+          (mousemove)="onMouseMove($event)"
+          (mouseup)="onMouseUp()"
+          (mouseleave)="onMouseUp()"
+        >
+          @for (recipe of filteredRecipes(); track recipe.id) {
+            <div (click)="navigateToRecipe(recipe)">
+              <app-recipe-card [recipe]="recipe" />
+            </div>
+          }
+        </div>
+      }
+    </div>
+    }
+  </section>
   <div class="cuisine-grid">
     @for (cuisine of cuisines(); track cuisine.type) {
       <div

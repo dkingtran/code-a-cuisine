@@ -1,9 +1,10 @@
-import { Component, ChangeDetectionStrategy, inject, signal, ElementRef, viewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, ElementRef, viewChild, OnInit } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
 import { Cuisine, Recipe } from '../../shared/models/recipe.model';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 import { RecipeCardComponent } from '../../shared/components/recipe-card/recipe-card';
+import { FirebaseService } from '../../shared/services/firebase.service';
 
 @Component({
   selector: 'app-cookbook',
@@ -12,23 +13,35 @@ import { RecipeCardComponent } from '../../shared/components/recipe-card/recipe-
   styleUrl: './cookbook.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CookbookComponent {
+export class CookbookComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly firebaseService = inject(FirebaseService);
 
   liked = signal(false);
   toggleLike(): void { this.liked.update(v => !v); }
 
-  readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('recipeScroll');
+  readonly allRecipesCollapsed = signal(false);
+  toggleAllRecipes(): void { this.allRecipesCollapsed.update(v => !v); }
 
+  readonly loading = signal(true);
+  readonly loadError = signal(false);
+
+  readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('recipeScroll');
+  readonly allRecipesGrid = viewChild<ElementRef<HTMLDivElement>>('allRecipesGrid');
+
+  private activeScroll: HTMLDivElement | null = null;
   private isDragging = false;
   private hasDragged = false;
   private dragStartX = 0;
   private scrollStartLeft = 0;
   private readonly DRAG_THRESHOLD = 5;
 
-  onMouseDown(event: MouseEvent): void {
-    const el = this.scrollContainer()?.nativeElement;
+  onMouseDown(event: MouseEvent, container?: ElementRef<HTMLDivElement> | HTMLDivElement): void {
+    const el = container instanceof HTMLDivElement
+      ? container
+      : container?.nativeElement ?? this.scrollContainer()?.nativeElement;
     if (!el) return;
+    this.activeScroll = el;
     this.isDragging = true;
     this.hasDragged = false;
     this.dragStartX = event.pageX - el.offsetLeft;
@@ -37,9 +50,8 @@ export class CookbookComponent {
   }
 
   onMouseMove(event: MouseEvent): void {
-    if (!this.isDragging) return;
-    const el = this.scrollContainer()?.nativeElement;
-    if (!el) return;
+    if (!this.isDragging || !this.activeScroll) return;
+    const el = this.activeScroll;
     const x = event.pageX - el.offsetLeft;
     const delta = x - this.dragStartX;
     if (Math.abs(delta) > this.DRAG_THRESHOLD) {
@@ -50,8 +62,10 @@ export class CookbookComponent {
 
   onMouseUp(): void {
     this.isDragging = false;
-    const el = this.scrollContainer()?.nativeElement;
-    if (el) el.style.cursor = 'pointer';
+    if (this.activeScroll) {
+      this.activeScroll.style.cursor = 'pointer';
+      this.activeScroll = null;
+    }
   }
 
   onScrollClick(event: MouseEvent): void {
@@ -66,7 +80,17 @@ export class CookbookComponent {
       this.hasDragged = false;
       return;
     }
-    void this.router.navigate(['/recipe', recipe.id]);
+    void this.router.navigate(['/recipe', recipe.id], { state: { recipe } });
+  }
+
+  ngOnInit(): void {
+    this.firebaseService.getRecipes().then(recipes => {
+      this.recipes.set(recipes);
+      this.loading.set(false);
+    }).catch(() => {
+      this.loadError.set(true);
+      this.loading.set(false);
+    });
   }
 
   cuisines = signal<Cuisine[]>([
@@ -78,38 +102,45 @@ export class CookbookComponent {
     { type: 'fusion', name: 'Fusion Cuisine', imageUrl: 'assets/img/cookbook/fusion.png', iconUrl: 'assets/img/cookbook/icon/fusion.png' },
   ]);
 
-  recipes = signal<Recipe[]>([
-    {
-      id: '1', number: 1,
-      title: 'Pasta alla Trapanese (Sicilian Tomato Pesto)',
-      description: 'A classic Sicilian pasta dish.', ingredients: [], directions: [],
-      cuisine: 'Italian', time: 25, likes: 142
-    },
-    {
-      id: '2', number: 2,
-      title: 'Risotto ai Funghi Porcini',
-      description: 'Creamy porcini mushroom risotto.', ingredients: [], directions: [],
-      cuisine: 'Italian', time: 40, likes: 98
-    },
-    {
-      id: '3', number: 3,
-      title: 'Wiener Schnitzel mit Kartoffelsalat',
-      description: 'Traditional Austrian breaded veal cutlet.', ingredients: [], directions: [],
-      cuisine: 'German', time: 35, likes: 115
-    },
-    {
-      id: '4', number: 4,
-      title: 'Coq au Vin Blanc',
-      description: 'French chicken braised in white wine.', ingredients: [], directions: [],
-      cuisine: 'French', time: 60, likes: 87
-    },
-    {
-      id: '5', number: 5,
-      title: 'Pad Thai mit gerösteten Erdnüssen',
-      description: 'Classic Thai stir-fried rice noodles.', ingredients: [], directions: [],
-      cuisine: 'Thai', time: 20, likes: 203
-    }
-  ]);
+  recipes = signal<Recipe[]>([]);
+
+  /** Active cuisine filter value, or null for no filter. */
+  readonly selectedCuisineFilter = signal<string | null>(null);
+
+  /** Active diet filter value, or null for no filter. */
+  readonly selectedDietFilter = signal<string | null>(null);
+
+  /** Active time filter value, or null for no filter. */
+  readonly selectedTimeFilter = signal<'quick' | 'medium' | 'complex' | null>(null);
+
+  /** Recipes filtered by the currently active cuisine, diet and time filters. */
+  readonly filteredRecipes = computed(() => {
+    let result = this.recipes();
+    const cuisine = this.selectedCuisineFilter();
+    if (cuisine) result = result.filter(r => r.cuisine?.toLowerCase() === cuisine);
+    const diet = this.selectedDietFilter();
+    if (diet) result = result.filter(r => r.tags?.some(t => t.toLowerCase() === diet.toLowerCase()));
+    const time = this.selectedTimeFilter();
+    if (time === 'quick') result = result.filter(r => r.time <= 20);
+    else if (time === 'medium') result = result.filter(r => r.time > 20 && r.time <= 45);
+    else if (time === 'complex') result = result.filter(r => r.time > 45);
+    return result;
+  });
+
+  /** Toggles the cuisine filter — deselects if already active. */
+  setCuisineFilter(value: string): void {
+    this.selectedCuisineFilter.set(this.selectedCuisineFilter() === value ? null : value);
+  }
+
+  /** Toggles the diet filter — deselects if already active. */
+  setDietFilter(value: string): void {
+    this.selectedDietFilter.set(this.selectedDietFilter() === value ? null : value);
+  }
+
+  /** Toggles the time filter — deselects if already active. */
+  setTimeFilter(value: 'quick' | 'medium' | 'complex'): void {
+    this.selectedTimeFilter.set(this.selectedTimeFilter() === value ? null : value);
+  }
 
   openCuisine(type: string): void {
     void this.router.navigate(['/cuisine', type]);

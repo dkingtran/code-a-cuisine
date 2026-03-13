@@ -64,16 +64,19 @@ export class GenerateRecipeComponent {
     return null;
   });
 
+  /** Returns the short display label for a unit ('g', 'ml', 'pc'). */
   unitLabel(unit: 'gram' | 'ml' | 'piece'): string {
     if (unit === 'gram') return 'g';
     if (unit === 'piece') return 'pc';
     return 'ml';
   }
 
+  /** Toggles the unit selection dropdown open/closed. */
   toggleDropdown(): void {
     this.dropdownOpen.update(v => !v);
   }
 
+  /** Sets the selected unit and closes the dropdown. */
   selectUnit(unit: 'gram' | 'ml' | 'piece'): void {
     this.selectedUnit.set(unit);
     this.dropdownOpen.set(false);
@@ -83,6 +86,10 @@ export class GenerateRecipeComponent {
     this.dropdownOpen.set(false);
   }
 
+  /**
+   * Adds a new ingredient to the list using the current input values.
+   * Clears input fields and suggestions after adding.
+   */
   addIngredient(): void {
     const name = this.ingredientName().trim();
     const amount = this.servingAmount().trim();
@@ -99,6 +106,7 @@ export class GenerateRecipeComponent {
     this.suggestionsOpen.set(false);
   }
 
+  /** Removes an ingredient from the list by its ID. */
   removeIngredient(id: number): void {
     this.ingredients.update(list => list.filter(i => i.id !== id));
   }
@@ -118,6 +126,10 @@ export class GenerateRecipeComponent {
     this.editingDropdownOpen.set(null);
   }
 
+  /**
+   * Debounces the name input and fetches autocomplete suggestions
+   * from the Open Food Facts API (EN + DE) for ingredient names.
+   */
   onIngredientNameInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const filtered = input.value.replace(/[^a-zA-ZäöüÄÖÜß\s]/g, '');
@@ -155,6 +167,7 @@ export class GenerateRecipeComponent {
     }, 300);
   }
 
+  /** Fills the ingredient name input with the selected suggestion. */
   selectSuggestion(name: string): void {
     this.ingredientName.set(name);
     this.suggestions.set([]);
@@ -196,6 +209,7 @@ export class GenerateRecipeComponent {
     this.editingDropdownOpen.set(null);
   }
 
+  /** Navigates to the preferences page to continue recipe generation. */
   goToPreferences(): void {
     void this.router.navigate(['/preferences']);
   }

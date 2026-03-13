@@ -29,7 +29,7 @@
           <app-svg-icon name="clock" size="20"></app-svg-icon>
           <h2>Cooking time:</h2>
         </div>
-        <div class="display-row gap-20 flex-wrap">
+        <div class="display-row tag-row flex-wrap">
           <div class="prep-time display-column gap-12">
             <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Quick'" (click)="selectCookingTime('Quick')">Quick</button>
             <p>up to 20 min</p>
@@ -49,7 +49,7 @@
           <app-svg-icon name="globe" size="20"></app-svg-icon>
           <h2>Cuisine</h2>
         </div>
-        <div class="display-row gap-20 flex-wrap">
+        <div class="display-row tag-row flex-wrap">
           <button class="tags-btn" [class.selected]="selectedCuisine() === 'German'" (click)="selectCuisine('German')">German</button>
           <button class="tags-btn" [class.selected]="selectedCuisine() === 'Italian'" (click)="selectCuisine('Italian')">Italian</button>
           <button class="tags-btn" [class.selected]="selectedCuisine() === 'Indian'" (click)="selectCuisine('Indian')">Indian</button>
@@ -63,7 +63,7 @@
           <app-svg-icon name="fork-knife" size="20"></app-svg-icon>
           <h2>Diet preferences</h2>
         </div>
-        <div class="display-row gap-20 flex-wrap">
+        <div class="display-row tag-row flex-wrap">
           <button class="tags-btn" [class.selected]="selectedDiet() === 'Vegetarian'" (click)="selectDiet('Vegetarian')">Vegetarian</button>
           <button class="tags-btn" [class.selected]="selectedDiet() === 'Vegan'" (click)="selectDiet('Vegan')">Vegan</button>
           <button class="tags-btn" [class.selected]="selectedDiet() === 'Keto'" (click)="selectDiet('Keto')">Keto</button>
@@ -72,6 +72,15 @@
       </div>
     </div>
 </div>
+  <div class="quota-info" aria-live="polite">
+    @if (isQuotaLoading()) {
+      <span class="quota-info__text">Loading quota...</span>
+    } @else {
+      <span class="quota-info__text" [class.quota-info__text--low]="globalRemaining() <= 3" [class.quota-info__text--empty]="globalRemaining() === 0">
+        {{ globalRemaining() }} of {{ GLOBAL_LIMIT }} daily recipes remaining
+      </span>
+    }
+  </div>
   <button type="button" (click)="generateRecipe()" class="btn primary-btn-green display-center-center">Generate a Recipe</button>
 </div>
 
@@ -106,4 +115,41 @@
       </div>
     </div>
   </div> 
+}
+
+@if (showQuotaModal()) {
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    (click)="closeQuotaModal()"
+    (keydown.escape)="closeQuotaModal()"
+  >
+    <div
+      #quotaBox
+      class="modal-box display-column"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="quota-modal-title"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-close-row">
+        <button type="button" class="modal-close-btn" (click)="closeQuotaModal()" aria-label="Close">
+          <app-svg-icon name="close-creme" size="14"></app-svg-icon>
+        </button>
+      </div>
+      <div class="modal-body display-column gap-24">
+        <h1 id="quota-modal-title">Daily limit <span class="h1-break">reached</span></h1>
+        @if (showQuotaModal() === 'ip') {
+          <p>You've used all {{ IP_LIMIT }} of your daily recipe generations. Come back tomorrow for fresh recipe ideas!</p>
+        } @else {
+          <p>The daily limit of {{ GLOBAL_LIMIT }} recipe generations has been reached. Come back tomorrow!</p>
+        }
+        <button type="button" class="action-arrow-btn" (click)="closeQuotaModal()">
+          Back to preferences
+          <app-svg-icon name="forward-btn-creme" [width]="22" [height]="15"></app-svg-icon>
+        </button>
+      </div>
+    </div>
+  </div>
 }

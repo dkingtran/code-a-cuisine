@@ -124,19 +124,19 @@ export type SvgIconName =
     }
 
     @if (isChef1()) {
-      <img ngSrc="/assets/img/recipe-view/icon/chef_1.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
+      <img ngSrc="/assets/img/recipe-view/icon/chef_1.png" [style.width]="wCss()" [style.height]="hCss()" width="28" height="22" alt="" aria-hidden="true"/>
     }
 
     @if (isChef2()) {
-      <img ngSrc="/assets/img/recipe-view/icon/chef_2.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
+      <img ngSrc="/assets/img/recipe-view/icon/chef_2.png" [style.width]="wCss()" [style.height]="hCss()" width="25" height="22" alt="" aria-hidden="true"/>
     }
 
     @if (isChef3()) {
-      <img ngSrc="/assets/img/recipe-view/icon/chef_3.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
+      <img ngSrc="/assets/img/recipe-view/icon/chef_3.png" [style.width]="wCss()" [style.height]="hCss()" width="22" height="22" alt="" aria-hidden="true"/>
     }
 
     @if (isChef4()) {
-      <img ngSrc="/assets/img/recipe-view/icon/chef_4.png" [style.width]="wCss()" [style.height]="hCss()" [width]="+w()" [height]="+h()" alt="" aria-hidden="true"/>
+      <img ngSrc="/assets/img/recipe-view/icon/chef_4.png" [style.width]="wCss()" [style.height]="hCss()" width="15" height="22" alt="" aria-hidden="true"/>
     }
 
     @if (isHeart()) {
@@ -146,7 +146,7 @@ export type SvgIconName =
     }
 
     @if (isBannerIngredients()) {
-      <img ngSrc="/assets/img/recipe-view/ingredients.png" style="width: 100%; height: auto; display: block;" width="1152" height="148" alt="" aria-hidden="true"/>
+      <img ngSrc="/assets/img/recipe-view/ingredients.png" style="width: 100%; height: auto; display: block;" width="1152" height="148" alt="" aria-hidden="true" priority/>
     }
 
     @if (isBannerDirections()) {

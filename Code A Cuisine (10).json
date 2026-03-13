@@ -1,0 +1,257 @@
+{
+  "name": "Code A Cuisine",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "935a2f3b-3b9f-4533-bd45-d2f976dcd56e",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -592,
+        144
+      ],
+      "id": "6018cee9-49d9-41cf-9cf0-3cf3b503931f",
+      "name": "Webhook",
+      "webhookId": "935a2f3b-3b9f-4533-bd45-d2f976dcd56e"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a professional chef AI. The user sends you ingredients and cooking preferences.\nThe ingredient names may be provided in German, English, or a mix of both languages. Recognize and process them regardless of which language they are written in. Treat \"Pfeffer\" and \"pepper\", \"Salz\" and \"salt\", etc. as the same ingredient.\nGenerate exactly 3 recipes and return ONLY a valid JSON array. No explanation, no markdown code blocks, no extra text — pure JSON only.\n\nEach recipe must follow this exact structure:\n[\n  {\n    \"id\": \"1\",\n    \"number\": 1,\n    \"title\": \"Recipe Title\",\n    \"description\": \"Short 1-2 sentence description\",\n    \"cuisine\": \"italian\",\n    \"time\": 20,\n    \"tags\": [\"Vegetarian\", \"Quick\"],\n    \"ingredients\": [\"320g Pasta\", \"400g Tomatoes\"],\n    \"extraIngredients\": [\"Fresh Basil\"],\n    \"directions\": [\n      { \"title\": \"Step title\", \"text\": \"Step description.\" }\n    ],\n    \"nutrition\": { \"calories\": 580, \"protein\": 16, \"fat\": 8, \"carbs\": 95 },\n    \"likes\": 0\n  }\n]\n\nRules:\n- cuisine must be lowercase (e.g. \"italian\", \"german\", \"japanese\", \"indian\", \"fusion\")\n- time is a number (minutes)\n- tags only from: Quick, Medium, Complex, Vegetarian, Vegan, Keto\n- id must be \"1\", \"2\", \"3\" as strings\n- number must be 1, 2, 3 as integers\n\nIngredients: {{ $('Webhook').item.json.body.ingredients }}\nPortions: {{ $('Webhook').item.json.body.portions }}\nPersons: {{ $('Webhook').item.json.body.persons }}\nCooking time: {{ $('Webhook').item.json.body.cookingTime }}\nCuisine: {{ $('Webhook').item.json.body.cuisine }}\nDiet: {{ $('Webhook').item.json.body.diet }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        176,
+        0
+      ],
+      "id": "079d664e-4340-42f5-87ca-eff891eca692",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        512,
+        0
+      ],
+      "id": "33a8d6d4-a9d1-4663-af1d-e5e4948ec4f9",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        160,
+        192
+      ],
+      "id": "3259a903-f4aa-4b74-9ee2-ffde1861ab15",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HIvgqAMYAvCxHkLT",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const ip = $input.item.json.headers?.['x-forwarded-for']?.split(',')[0]?.trim() \n           || $input.item.json.headers?.['x-real-ip'] \n           || 'unknown';\nconst today = new Date().toISOString().slice(0, 10);\nreturn [{ json: { ip, date: today, ...$input.item.json } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        144
+      ],
+      "id": "cbcb86c1-dd7c-4f80-a716-c4f3db7de45f",
+      "name": "Check IP Quota"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f217ead1-a4bf-4832-b01d-7cce341d4948",
+              "leftValue": "={{ $json.body.ingredients }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -160,
+        144
+      ],
+      "id": "b2530160-84cf-4cc7-b8db-83e2bed607dd",
+      "name": "Validate Input"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"error\": \"No ingredients provided\", \"code\": \"INVALID_INPUT\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        384
+      ],
+      "id": "3466ae17-c1fb-4b50-be0c-95bce98fb659",
+      "name": "Respond - Invalid Input"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        176,
+        560
+      ],
+      "id": "74ee8958-044b-4317-a257-c5537dd8ed36",
+      "name": "Error Handler"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"error\": \"Internal workflow error\", \"code\": \"WORKFLOW_ERROR\" }",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        384,
+        560
+      ],
+      "id": "653c6d0d-34b4-48f3-88fa-723a19e6bfcf",
+      "name": "Respond - Workflow Error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check IP Quota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check IP Quota": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Invalid Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Handler": {
+      "main": [
+        [
+          {
+            "node": "Respond - Workflow Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Berlin",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "executionTimeout": -1,
+    "errorWorkflow": "R1kp14g3VOJSdA2t"
+  },
+  "versionId": "21735872-cc69-4088-9f06-cf5208adb364",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "01995ce7a7bfc75cfc6a0f2e6edd025af9b9a71880c140b9c72213d4834155d0"
+  },
+  "id": "boo3ArLhCj3fzy6x",
+  "tags": []
+}

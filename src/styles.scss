@@ -148,6 +148,12 @@ a {
     color: #10310B;
 }
 
+.tag-row {
+    display: flex;
+    gap: clamp(8px, 3vw, 20px);
+    flex-wrap: wrap;
+}
+
 .primary-btn-green {
     font-weight: 600;
     font-size: clamp(16px, 3vw, 24px);

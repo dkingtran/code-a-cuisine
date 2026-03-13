@@ -23,7 +23,7 @@
                 @for (chef of allChefs; track chef; let i = $index) {
                   @if (i < preferencesService.persons()) {
                     <span class="chef-tag" [style.background-color]="chefConfig[chef].bgColor">
-                      <app-svg-icon [name]="chef" [size]="22" />
+                      <app-svg-icon [name]="chef" [width]="chefConfig[chef].iconWidth" [height]="chefConfig[chef].iconHeight" />
                       {{ chefConfig[chef].label }}
                     </span>
                   }

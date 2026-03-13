@@ -30,6 +30,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/cuisine-recipes/cuisine-recipes').then(m => m.CuisineRecipesComponent)
     },
     {
+        path: 'impressum',
+        loadComponent: () => import('./pages/impressum/impressum').then(m => m.ImpressumComponent)
+    },
+    {
         path: '**',
         redirectTo: ''
     }
