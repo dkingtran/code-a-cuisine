@@ -40,7 +40,7 @@
               <span class="recipe-tag">{{ tag }}</span>
             }
             @if (recipe()!.likes !== undefined) {
-              <span class="recipe-tag recipe-tag--likes"><app-svg-icon name="heart" size="18" /> {{ recipe()!.likes }}</span>
+              <span class="recipe-tag recipe-tag--likes"><app-svg-icon name="heart" size="18" /> {{ likes() }}</span>
             }
           </div>
 

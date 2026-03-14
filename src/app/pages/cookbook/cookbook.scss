@@ -260,6 +260,7 @@
     .all-recipes-grid {
         display: flex;
         flex-direction: row;
+        border-radius: 16px;
         gap: 12px;
         overflow-x: auto;
         overflow-y: hidden;

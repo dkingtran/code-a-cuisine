@@ -14,6 +14,10 @@
     display: flex;
 }
 
+.overlay-content {
+    gap: 32px;
+}
+
 .loading-container {
     text-align: center;
 }
@@ -21,13 +25,15 @@
 .loading-gif {
     min-width: 100px;
     min-height: 120px;
-    max-width: 200px;
-    max-height: 240px;
+    max-width: 253px;
+    max-height: 309px;
     aspect-ratio: 4 / 4.7;
 }
 
 p {
-    font-size: 1.2rem;
-    color: #fff;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    font-family: 'ubuntu', sans-serif;
+    color: #FAF0E6;
     margin: 0;
 }

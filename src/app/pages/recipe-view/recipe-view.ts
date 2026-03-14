@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, signal, computed, inject, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RecipeService } from '../../shared/services/recipe.service';
+import { FirebaseService } from '../../shared/services/firebase.service';
 import { Recipe, RecipeDirection } from '../../shared/models/recipe.model';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 import { PreferencesService, CHEF_CONFIG, ALL_CHEFS } from '../../core/services/preferences.service';
@@ -12,21 +13,55 @@ import { PreferencesService, CHEF_CONFIG, ALL_CHEFS } from '../../core/services/
   styleUrl: './recipe-view.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RecipeViewComponent implements OnDestroy {
+export class RecipeViewComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private recipeService = inject(RecipeService);
+  private firebaseService = inject(FirebaseService);
+  private cdr = inject(ChangeDetectorRef);
   readonly preferencesService = inject(PreferencesService);
 
   readonly chefConfig = CHEF_CONFIG;
   readonly allChefs = ALL_CHEFS;
 
+  private readonly LIKED_KEY = 'cac_liked_recipes';
+  private unsubscribeLikes: (() => void) | null = null;
+
   recipe = signal<Recipe | null>(null);
+  likes = signal<number>(0);
   ingredientsCollapsed = signal(false);
   directionsCollapsed = signal(false);
   liked = signal(false);
 
-  toggleLike(): void { this.liked.update(v => !v); }
+  toggleLike(): void {
+    const r = this.recipe();
+    if (!r?.id) return;
+    const newLiked = !this.liked();
+    this.liked.set(newLiked);
+    const delta = newLiked ? 1 : -1;
+    // Optimistic update
+    this.likes.update(v => v + delta);
+    // Persist liked state in localStorage
+    const stored = this.getLikedSet();
+    newLiked ? stored.add(r.id) : stored.delete(r.id);
+    localStorage.setItem(this.LIKED_KEY, JSON.stringify([...stored]));
+    // Write to Firestore
+    this.firebaseService.incrementLike(r.id, delta).catch(() => {
+      // Revert optimistic update on failure
+      this.liked.set(!newLiked);
+      this.likes.update(v => v - delta);
+      this.cdr.markForCheck();
+    });
+  }
+
+  private getLikedSet(): Set<string> {
+    try {
+      const raw = localStorage.getItem(this.LIKED_KEY);
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch {
+      return new Set();
+    }
+  }
 
   private readonly onResize = () => {
     if (window.innerWidth > 600) {
@@ -57,6 +92,7 @@ export class RecipeViewComponent implements OnDestroy {
     const state = history.state as { recipe?: Recipe };
     if (state?.recipe) {
       this.recipe.set(state.recipe);
+      this.initLikes(state.recipe);
       return;
     }
     if (id) {
@@ -80,10 +116,22 @@ export class RecipeViewComponent implements OnDestroy {
         likes: 42,
         nutrition: { calories: 630, protein: 28, fat: 18, carbs: 74 },
       });
+      this.initLikes(this.recipe()!);
     }
+  }
+
+  private initLikes(recipe: Recipe): void {
+    this.likes.set(recipe.likes ?? 0);
+    this.liked.set(this.getLikedSet().has(recipe.id));
+    // Real-time listener – updates whenever anyone likes from any device
+    this.unsubscribeLikes = this.firebaseService.listenToLikes(recipe.id, count => {
+      this.likes.set(count);
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.onResize);
+    this.unsubscribeLikes?.();
   }
 }

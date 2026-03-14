@@ -1,7 +1,8 @@
-import { Component, signal, computed, effect, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, signal, computed, effect, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { merge, Subscription, EMPTY, of } from 'rxjs';
+import { timeout, catchError, scan, finalize } from 'rxjs/operators';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 
 interface Ingredient {
@@ -18,7 +19,7 @@ interface Ingredient {
   styleUrl: './generate-recipe.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GenerateRecipeComponent {
+export class GenerateRecipeComponent implements OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
@@ -26,6 +27,25 @@ export class GenerateRecipeComponent {
 
   private readonly STORAGE_KEY = 'cac_ingredients';
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private suggestSubscription: Subscription | null = null;
+
+  private readonly FALLBACK_INGREDIENTS = [
+    'Butter', 'Salt', 'Pepper', 'Sugar', 'Flour', 'Egg', 'Milk', 'Cream',
+    'Olive oil', 'Sunflower oil', 'Garlic', 'Onion', 'Tomato', 'Carrot',
+    'Potato', 'Pasta', 'Rice', 'Bread', 'Cheese', 'Yogurt', 'Chicken',
+    'Beef', 'Pork', 'Salmon', 'Tuna', 'Shrimp', 'Lemon', 'Lime', 'Orange',
+    'Apple', 'Banana', 'Strawberry', 'Spinach', 'Broccoli', 'Cauliflower',
+    'Zucchini', 'Eggplant', 'Bell pepper', 'Mushroom', 'Corn', 'Peas',
+    'Beans', 'Lentils', 'Chickpeas', 'Basil', 'Oregano', 'Thyme', 'Rosemary',
+    'Cumin', 'Paprika', 'Cinnamon', 'Ginger', 'Turmeric', 'Chili', 'Honey',
+    'Soy sauce', 'Vinegar', 'Mustard', 'Ketchup', 'Mayonnaise', 'Cream cheese',
+    'Parmesan', 'Mozzarella', 'Cheddar', 'Tofu', 'Coconut milk', 'Oats',
+    'Almonds', 'Walnuts', 'Peanuts', 'Sesame', 'Sunflower seeds', 'Pumpkin seeds',
+    'Pfeffer', 'Salz', 'Zucker', 'Mehl', 'Ei', 'Milch', 'Sahne', 'Knoblauch',
+    'Zwiebel', 'Tomate', 'Kartoffel', 'Karotte', 'Hähnchen', 'Rindfleisch',
+    'Lachs', 'Zitrone', 'Apfel', 'Erdbeere', 'Spinat', 'Paprika', 'Pilze',
+    'Ingwer', 'Honig', 'Senf', 'Essig', 'Kokosmilch', 'Mandeln', 'Walnüsse',
+  ];
 
   readonly units = ['gram', 'ml', 'piece'] as const;
   readonly itemBullet = '•';
@@ -146,23 +166,47 @@ export class GenerateRecipeComponent {
     }
 
     this.debounceTimer = setTimeout(() => {
+      this.suggestSubscription?.unsubscribe();
       const params = { term, tagtype: 'ingredients' };
-      forkJoin([
-        this.http.get<string[]>('https://world.openfoodfacts.org/cgi/suggest.pl', { params }),
-        this.http.get<string[]>('https://de.openfoodfacts.org/cgi/suggest.pl', { params }),
-      ]).subscribe({
-        next: ([en, de]) => {
-          const lower = term.toLowerCase();
-          const merged = [...new Set([...en, ...de])]
-            .filter(r => r.toLowerCase().startsWith(lower));
-          this.suggestions.set(merged.slice(0, 5));
-          this.suggestionsOpen.set(merged.length > 0);
-          this.cdr.markForCheck();
+      const lower = term.toLowerCase();
+      let gotResults = false;
+
+      const fallback = () => {
+        const local = this.FALLBACK_INGREDIENTS
+          .filter(r => r.toLowerCase().includes(lower))
+          .slice(0, 5);
+        this.suggestions.set(local);
+        this.suggestionsOpen.set(local.length > 0);
+        this.cdr.markForCheck();
+      };
+
+      const req = (url: string) => this.http.get<string[]>(url, { params }).pipe(
+        timeout(4000),
+        catchError(() => EMPTY),
+      );
+      this.suggestSubscription = merge(
+        req('https://world.openfoodfacts.org/cgi/suggest.pl'),
+        req('https://de.openfoodfacts.org/cgi/suggest.pl'),
+      ).pipe(
+        scan((acc: string[], results: string[]) => {
+          const cleaned = results
+            .map(r => r.replace(/^[a-z]{2}:/i, '').trim())
+            .filter(r => r.toLowerCase().includes(lower));
+          return [...new Set([...acc, ...cleaned])].slice(0, 5);
+        }, [] as string[]),
+        finalize(() => {
+          if (!gotResults) fallback();
+        }),
+      ).subscribe({
+        next: (merged) => {
+          if (merged.length > 0) {
+            gotResults = true;
+            this.suggestions.set(merged);
+            this.suggestionsOpen.set(true);
+            this.cdr.markForCheck();
+          }
         },
-        error: () => {
-          this.suggestions.set([]);
-          this.suggestionsOpen.set(false);
-        },
+        error: () => fallback(),
       });
     }, 300);
   }
@@ -207,6 +251,11 @@ export class GenerateRecipeComponent {
       list.map(i => i.id === item.id ? { ...i, unit } : i)
     );
     this.editingDropdownOpen.set(null);
+  }
+
+  ngOnDestroy(): void {
+    this.suggestSubscription?.unsubscribe();
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
   }
 
   /** Navigates to the preferences page to continue recipe generation. */

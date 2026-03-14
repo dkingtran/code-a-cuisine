@@ -78,6 +78,7 @@ export class RecipeService {
         this.generatedRecipes.set(recipes);
         const tags = [...new Set(recipes.flatMap(r => r.tags ?? []))];
         this.generatedTags.set(tags);
+        localStorage.removeItem(INGREDIENTS_KEY);
         this.firebase.saveRecipes(recipes).catch(err =>
           this.logger.log(`Failed to save recipes to Firestore: ${err}`)
         );

@@ -70,6 +70,18 @@
 }
 
 // 3. Recipe list
+.cuisine-loading,
+.cuisine-empty {
+    text-align: center;
+    color: #396039;
+    font-size: clamp(16px, 2vw, 20px);
+    padding: 48px 0;
+
+    p {
+        margin-bottom: 24px;
+    }
+}
+
 .cuisine-recipe-list {
     list-style: none;
     margin: 0;
@@ -198,6 +210,7 @@
         display: inline-flex;
         align-items: center;
         background-color: #3960394D;
+        min-width: 64px;
     }
 }
 

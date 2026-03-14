@@ -19,18 +19,26 @@
   </div>
 
   <!-- 3. Recipe list -->
+  @if (isLoading()) {
+    <div class="cuisine-loading" role="status" aria-live="polite">Loading recipes…</div>
+  } @else if (allRecipes().length === 0) {
+    <div class="cuisine-empty">
+      <p>No recipes yet for {{ cuisineName() }}.</p>
+      <button type="button" class="primary-btn-green" (click)="goToGenerate()">Generate the first one</button>
+    </div>
+  } @else {
   <ul
     class="cuisine-recipe-list"
     role="list"
     [attr.aria-label]="cuisineName() + ' recipes'"
   >
-    @for (recipe of recipes(); track recipe.id) {
+    @for (recipe of pagedRecipes(); track recipe.id) {
       <li
         class="cuisine-recipe-item"
         role="listitem"
-        (click)="navigateToRecipe(recipe.id)"
-        (keydown.enter)="navigateToRecipe(recipe.id)"
-        (keydown.space)="navigateToRecipe(recipe.id)"
+        (click)="navigateToRecipe(recipe)"
+        (keydown.enter)="navigateToRecipe(recipe)"
+        (keydown.space)="navigateToRecipe(recipe)"
         tabindex="0"
         [attr.aria-label]="'Open recipe: ' + recipe.title"
       >
@@ -44,7 +52,7 @@
         <h3 class="cuisine-recipe-item__title">{{ recipe.title }}</h3>
 
         <div class="cuisine-recipe-item__tags">
-          @for (tag of recipe.tags; track tag) {
+          @for (tag of sortedTagsFor(recipe); track tag) {
             <span class="recipe-tag">{{ tag }}</span>
           }
           @if (recipe.likes !== undefined) {
@@ -57,8 +65,10 @@
       </li>
     }
   </ul>
+  } <!-- end @else -->
 
-  <!-- 4. Pagination -->
+  <!-- 4. Pagination (only shown when more than 1 page) -->
+  @if (!isLoading() && totalPages() > 1) {
   <nav class="pagination" aria-label="Page navigation">
     <div class="pagination__arrow">
       <button
@@ -100,5 +110,6 @@
       </button>
     </div>
   </nav>
+  } <!-- end pagination -->
 
 </div>

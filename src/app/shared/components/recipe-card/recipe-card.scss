@@ -28,9 +28,13 @@
     .recipe-tag {
         @include tags-btn-green;
         font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
         position: absolute;
         top: 16px;
         right: 12px;
+        min-width: 64px;
     }
 
     &__content {
