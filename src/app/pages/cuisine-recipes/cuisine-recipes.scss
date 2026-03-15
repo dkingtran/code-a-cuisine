@@ -97,7 +97,7 @@
 
 .cuisine-recipe-item {
     display: grid;
-    grid-template-columns: 40px 1fr auto;
+    grid-template-columns: auto 1fr auto;
     grid-template-rows: auto auto;
     grid-template-areas:
         "num time  tags"
@@ -131,13 +131,19 @@
         font-weight: 500;
         color: #1E5515;
         height: 30px;
-        width: 30px;
+        min-width: 30px;
+        width: auto;
+        padding: 0 6px;
         background-color: #F6E3CF;
-        border-radius: 50%;
+        border-radius: 15px;
         flex-shrink: 0;
 
         @media (max-width: 600px) {
             justify-self: start;
+        }
+
+        &--triple {
+            margin-right: 2px;
         }
     }
 

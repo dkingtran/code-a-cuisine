@@ -10,7 +10,6 @@ interface BackConfig {
 
 const BACK_CONFIG: Record<string, BackConfig> = {
   '/preferences': { route: '/generate', label: 'Ingredients' },
-  '/cookbook': { route: '/', label: 'Back' },
 };
 
 @Component({
@@ -38,15 +37,31 @@ export class HeaderComponent {
 
   protected readonly backConfig = computed((): BackConfig | null => {
     const url = this.currentUrl();
+    const prev = this.previousUrl();
+
     if (url.startsWith('/recipe/')) {
-      const fromCookbook = this.previousUrl().startsWith('/cookbook');
-      return fromCookbook
-        ? { route: '/cookbook', label: 'Back to the cookbook' }
-        : { route: '/results', label: 'Back to recipe results' };
+      if (prev.startsWith('/cookbook')) {
+        return { route: '/cookbook', label: 'Back to the cookbook' };
+      }
+      if (prev.startsWith('/cuisine/')) {
+        const type = prev.split('/')[2] ?? '';
+        const name = type.charAt(0).toUpperCase() + type.slice(1);
+        return { route: prev, label: `Back to ${name} Cuisine` };
+      }
+      return { route: '/results', label: 'Back to recipe results' };
     }
+
+    if (url === '/cookbook') {
+      if (prev.startsWith('/recipe/')) {
+        return { route: prev, label: 'Back to recipe' };
+      }
+      return { route: '/', label: 'Back' };
+    }
+
     if (url.startsWith('/cuisine/')) {
       return { route: '/cookbook', label: 'Cookbook' };
     }
+
     return BACK_CONFIG[url] ?? null;
   });
 

@@ -32,7 +32,7 @@
     role="list"
     [attr.aria-label]="cuisineName() + ' recipes'"
   >
-    @for (recipe of pagedRecipes(); track recipe.id) {
+    @for (recipe of pagedRecipes(); track recipe.id; let i = $index) {
       <li
         class="cuisine-recipe-item"
         role="listitem"
@@ -42,7 +42,7 @@
         tabindex="0"
         [attr.aria-label]="'Open recipe: ' + recipe.title"
       >
-        <span class="cuisine-recipe-item__number">{{ recipe.number }}.</span>
+        <span class="cuisine-recipe-item__number" [class.cuisine-recipe-item__number--triple]="(currentPage() - 1) * 20 + i + 1 >= 100">{{ (currentPage() - 1) * 20 + i + 1 }}.</span>
 
         <div class="cuisine-recipe-item__time">
           <app-svg-icon name="clock" [width]="16" [height]="16" aria-hidden="true" />
