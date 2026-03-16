@@ -37,14 +37,20 @@ export class FirebaseService {
 
     /**
      * Saves an array of generated recipes to the Firestore "recipes" collection.
-     * Each recipe is stored as a separate document with a server timestamp.
+     * Skips recipes whose title already exists to prevent duplicates.
      */
     async saveRecipes(recipes: Recipe[]): Promise<void> {
         const col = collection(this.db, 'recipes');
-        const saves = recipes.map(recipe =>
-            addDoc(col, { ...recipe, createdAt: Timestamp.now() })
-        );
+        const saves = recipes.map(recipe => this.saveIfNotDuplicate(col, recipe));
         await Promise.all(saves);
+    }
+
+    private async saveIfNotDuplicate(col: ReturnType<typeof collection>, recipe: Recipe): Promise<void> {
+        const q = query(col, where('title', '==', recipe.title));
+        const existing = await getDocs(q);
+        if (existing.empty) {
+            await addDoc(col, { ...recipe, createdAt: Timestamp.now() });
+        }
     }
 
     /**
