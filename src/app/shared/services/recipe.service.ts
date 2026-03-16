@@ -32,6 +32,9 @@ export class RecipeService {
   /** Signal holding the unique tags from the most recently generated recipes. */
   readonly generatedTags = signal<string[]>([]);
 
+  /** Signal holding the user's selected preference tags (cookingTime, cuisine, diet). */
+  readonly generatedPreferenceTags = signal<string[]>([]);
+
   /** Fetches all recipes from the API. */
   getRecipes(): Observable<Recipe[]> {
     this.logger.log('Fetching recipes');
@@ -78,6 +81,9 @@ export class RecipeService {
         this.generatedRecipes.set(recipes);
         const tags = [...new Set(recipes.flatMap(r => r.tags ?? []))];
         this.generatedTags.set(tags);
+        const prefTags = [preferences.cookingTime, preferences.cuisine, preferences.diet]
+          .filter((v): v is string => !!v);
+        this.generatedPreferenceTags.set(prefTags);
         localStorage.removeItem(INGREDIENTS_KEY);
         this.firebase.saveRecipes(recipes).catch(err =>
           this.logger.log(`Failed to save recipes to Firestore: ${err}`)
@@ -87,37 +93,36 @@ export class RecipeService {
   }
 }
 
-function parseRecipeResponse(raw: string): Recipe[] {
-  // Strip markdown code fences (```json ... ``` or ``` ... ```)
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+/** Strips markdown code fences from a raw string. */
+function stripMarkdownFences(raw: string): string {
+  return raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+}
 
+/** Extracts a Recipe array from a parsed JSON object of unknown shape. */
+function extractRecipesFromObject(parsed: unknown): Recipe[] {
+  if (Array.isArray(parsed)) return parsed as Recipe[];
+  if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && 'quotaExceeded' in parsed) {
+    const type = (parsed as { type?: string }).type ?? 'global';
+    throw new Error(`QUOTA_EXCEEDED:${type}`);
+  }
+  if (parsed && typeof parsed === 'object' && 'recipes' in parsed && Array.isArray((parsed as Record<string, unknown>)['recipes'])) {
+    return (parsed as { recipes: Recipe[] }).recipes;
+  }
+  if (parsed && typeof parsed === 'object' && 'output' in parsed) {
+    const inner = (parsed as Record<string, unknown>)['output'];
+    if (Array.isArray(inner)) return inner as Recipe[];
+    if (typeof inner === 'string') return parseRecipeResponse(inner);
+  }
+  throw new Error('Unexpected response shape from n8n');
+}
+
+function parseRecipeResponse(raw: string): Recipe[] {
+  const cleaned = stripMarkdownFences(raw);
   let parsed: unknown;
   try {
     parsed = JSON.parse(cleaned);
   } catch {
     throw new Error(`Failed to parse recipe response: ${cleaned.slice(0, 200)}`);
   }
-
-  // Quota exceeded error returned by n8n
-  if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && 'quotaExceeded' in parsed) {
-    const type = (parsed as { type?: string }).type ?? 'global';
-    throw new Error(`QUOTA_EXCEEDED:${type}`);
-  }
-
-  // Direct array
-  if (Array.isArray(parsed)) return parsed as Recipe[];
-
-  // { recipes: [...] }
-  if (parsed && typeof parsed === 'object' && 'recipes' in parsed && Array.isArray((parsed as Record<string, unknown>)['recipes'])) {
-    return (parsed as { recipes: Recipe[] }).recipes;
-  }
-
-  // { output: "[...]" } — n8n AI Agent wraps text in output field
-  if (parsed && typeof parsed === 'object' && 'output' in parsed) {
-    const inner = (parsed as Record<string, unknown>)['output'];
-    if (Array.isArray(inner)) return inner as Recipe[];
-    if (typeof inner === 'string') return parseRecipeResponse(inner);
-  }
-
-  throw new Error('Unexpected response shape from n8n');
+  return extractRecipesFromObject(parsed);
 }

@@ -37,6 +37,16 @@ h1 {
     margin-inline: auto;
 }
 
+.generate-btn--disabled {
+    background-color: #a8bfa8;
+    cursor: not-allowed;
+
+    &:hover {
+        background-color: #a8bfa8;
+        font-weight: 600;
+    }
+}
+
 .main-container {
     max-width: 720px;
     margin: auto;

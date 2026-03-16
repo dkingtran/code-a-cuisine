@@ -1,29 +1,71 @@
-# CodeACuisine
+# Code A Cuisine
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+**Code A Cuisine** is a smart recipe generator that turns your available ingredients into AI-powered recipe suggestions. Built for home cooks and flat-share residents who want to reduce food waste and cook more creatively.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- **Ingredient Input** — Add your ingredients with amount and unit (g, ml, piece) plus autocomplete suggestions
+- **Preferences** — Choose cooking time (Quick / Medium / Complex), cuisine style (Italian, German, Japanese, Indian, Gourmet, Fusion) and diet (Vegetarian, Vegan, Keto, No Preferences)
+- **AI Recipe Generation** — 3 unique recipes generated via n8n + Google Gemini
+- **Recipe Library** — All generated recipes are stored in Firebase and browsable by cuisine
+- **Real-time Likes** — Like recipes; count updates live across all devices via Firestore
+- **Quota System** — 3 recipes per IP per day, 12 system-wide per day (enforced in both Angular and n8n)
+- **Nutrition Info** — Calories, protein, fat and carbs per recipe
+- **Responsive Design** — Works on desktop, tablet and smartphone
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Angular 17+, TypeScript, SCSS |
+| AI Workflow | n8n + Google Gemini |
+| Database | Firebase Firestore |
+| Hosting | (local dev via Angular CLI) |
+
+## Getting Started
+
+### 1. Clone the repository
 
 ```bash
-ng serve
+git clone <repo-url>
+cd code-a-cuisine
+npm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### 2. Configure Firebase
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Copy the example environment file and fill in your Firebase credentials:
 
 ```bash
-ng generate component component-name
+cp src/environments/environment.ts.example src/environments/environment.ts
+cp src/environments/environment.prod.ts.example src/environments/environment.prod.ts
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 3. Configure n8n
+
+- Import one of the `Code A Cuisine (*.json)` workflow files into your n8n instance
+- Set your Google Gemini API key inside the AI Agent node
+- The webhook URL must match the proxy config in `proxy.conf.json`
+
+### 4. Start the development server
 
 ```bash
-ng generate --help
+npm start
+```
+
+Open your browser at `http://localhost:4200/`.
+
+## Project Structure
+
+```
+src/app/
+├── core/services/        # Loading, Logger, Preferences, Theme
+├── pages/                # Route-level components (home, generate, preferences, results, recipe-view, cookbook, cuisine-recipes, impressum)
+├── shared/
+│   ├── components/       # Header, Footer, RecipeCard, SvgIcon, LoadingOverlay
+│   ├── models/           # Recipe & Cuisine TypeScript interfaces
+│   └── services/         # Firebase, Recipe, Quota
+└── app.routes.ts         # Lazy-loaded route definitions
 ```
 
 ## Building

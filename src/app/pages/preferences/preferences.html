@@ -36,7 +36,7 @@
           </div>
           <div class="prep-time display-column gap-12">
             <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Medium'" (click)="selectCookingTime('Medium')">Medium</button>
-            <p>25 - 40 min</p>
+            <p>20 - 45 min</p>
           </div>
           <div class="prep-time display-column gap-12">
             <button class="tags-btn" [class.selected]="selectedCookingTime() === 'Complex'" (click)="selectCookingTime('Complex')">Complex</button>
@@ -81,7 +81,7 @@
       </span>
     }
   </div>
-  <button type="button" (click)="generateRecipe()" class="btn primary-btn-green display-center-center">Generate a Recipe</button>
+  <button type="button" (click)="generateRecipe()" class="btn primary-btn-green display-center-center" [disabled]="!canGenerate()" [class.generate-btn--disabled]="!canGenerate()">Generate a Recipe</button>
 </div>
 
 @if (showInsufficientModal()) {
@@ -106,8 +106,8 @@
         </button>
       </div>
       <div class="modal-body display-column gap-24">
-        <h1 id="insufficient-modal-title">Ups! <span class="h1-break">Not quite enough...</span></h1>
-        <p>It looks like some ingredient quantities aren't sufficient for your selected servings. Please add or adjust quantities and try again.</p>
+        <h1 id="insufficient-modal-title">Ups! <span class="h1-break">Something went wrong...</span></h1>
+        <p>The AI couldn't generate recipes with your current selection. Try adjusting your ingredients or preferences and try again.</p>
         <button type="button" class="action-arrow-btn" (click)="goBackToIngredients()">
           Go back to ingredients
           <app-svg-icon name="forward-btn-creme" [width]="22" [height]="15"></app-svg-icon>
@@ -139,7 +139,7 @@
         </button>
       </div>
       <div class="modal-body display-column gap-24">
-        <h1 id="quota-modal-title">Daily limit <span class="h1-break">reached</span></h1>
+        <h1 id="quota-modal-title">Daily limit <span class="h1-break">reached!</span></h1>
         @if (showQuotaModal() === 'ip') {
           <p>You've used all {{ IP_LIMIT }} of your daily recipe generations. Come back tomorrow for fresh recipe ideas!</p>
         } @else {

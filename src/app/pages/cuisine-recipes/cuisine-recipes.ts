@@ -51,6 +51,10 @@ export class CuisineRecipesComponent {
   desktopBannerUrl = computed(() => `/assets/img/recipes/banner-${this.cuisineType()}.png`);
   mobileBannerUrl = computed(() => `/assets/img/recipes/mobile/mobile-${this.cuisineType()}.png`);
 
+  /**
+   * Reads the cuisine type from the URL, then loads all matching recipes
+   * from Firestore sorted by likes descending.
+   */
   async ngOnInit() {
     const type = this.route.snapshot.paramMap.get('type');
     if (type) {
@@ -68,6 +72,10 @@ export class CuisineRecipesComponent {
     }
   }
 
+  /**
+   * Returns the recipe's tags sorted: diet tags first, then time tags, then the rest.
+   * @param recipe The recipe whose tags should be sorted.
+   */
   sortedTagsFor(recipe: Recipe): string[] {
     const tags = recipe.tags ?? [];
     const diet = tags.filter(t => DIET_TAGS.has(t));
@@ -76,14 +84,23 @@ export class CuisineRecipesComponent {
     return [...diet, ...time, ...rest];
   }
 
+  /**
+   * Navigates to the full recipe detail view, passing the recipe via router state.
+   * @param recipe The recipe to open.
+   */
   navigateToRecipe(recipe: Recipe) {
     this.router.navigate(['/recipe', recipe.id], { state: { recipe } });
   }
 
+  /** Navigates to the ingredient input page to generate a new recipe. */
   goToGenerate() {
     this.router.navigate(['/generate']);
   }
 
+  /**
+   * Navigates to the given page number and scrolls back to the top.
+   * @param page Target page number (1-based).
+   */
   goToPage(page: number | string) {
     const p = +page;
     if (p < 1 || p > this.totalPages()) return;

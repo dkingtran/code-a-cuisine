@@ -6,6 +6,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Use strict type checking
 - Prefer type inference when the type is obvious
 - Avoid the `any` type; use `unknown` when type is uncertain
+- **Functions must not exceed 14 lines of code.** If a function grows beyond 14 lines, break it into smaller, well-named helper functions.
 
 ## Angular Best Practices
 

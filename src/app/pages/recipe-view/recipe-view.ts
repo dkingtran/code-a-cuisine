@@ -33,6 +33,11 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
   directionsCollapsed = signal(false);
   liked = signal(false);
 
+  /**
+   * Toggles the like state for the current recipe.
+   * Performs an optimistic UI update and persists the change to Firestore.
+   * Reverts on failure.
+   */
   toggleLike(): void {
     const r = this.recipe();
     if (!r?.id) return;
@@ -54,6 +59,7 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Returns the set of recipe IDs the user has liked, read from localStorage. */
   private getLikedSet(): Set<string> {
     try {
       const raw = localStorage.getItem(this.LIKED_KEY);
@@ -70,8 +76,11 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
     }
   };
 
+  /** Collapses or expands the ingredients section. */
   toggleIngredients(): void { this.ingredientsCollapsed.update(v => !v); }
+  /** Collapses or expands the directions section. */
   toggleDirections(): void { this.directionsCollapsed.update(v => !v); }
+  /** Navigates back to the ingredient input page. */
   goToGenerate(): void { void this.router.navigate(['/generate']); }
 
   /** Groups directions into rows of `persons` columns for the grid layout. */
@@ -86,40 +95,53 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
     return pairs;
   });
 
+  /**
+   * Loads the recipe from router state or falls back to mock data when
+   * navigated to directly via URL. Starts the real-time likes listener.
+   */
   ngOnInit() {
     window.addEventListener('resize', this.onResize);
-    const id = this.route.snapshot.paramMap.get('id');
     const state = history.state as { recipe?: Recipe };
     if (state?.recipe) {
       this.recipe.set(state.recipe);
       this.initLikes(state.recipe);
       return;
     }
-    if (id) {
-      // TODO: MOCK DATA – delete once n8n delivers real recipes (replace with recipeService.getRecipeById(id))
-      this.recipe.set({
-        id,
-        number: 1,
-        title: 'Sample Recipe',
-        description: 'Description',
-        ingredients: ['80g Pasta noodles', '100g Baby spinach', '2 Garlic cloves'],
-        extraIngredients: ['40g Parmesan cheese', '30ml Olive oil', '1 tsp Salt'],
-        directions: [
-          { title: 'Cook the Pasta', text: 'Cook your noodles in boiling, salted water until the pasta is al dente. Drain the pasta and reserve some of the pasta water.' },
-          { title: 'Prepare the Sauce', text: 'While the pasta is cooking, heat olive oil in a pan over medium heat. Add the garlic and sauté until golden. Add tomatoes, oregano, salt, and pepper, and cook for 3–4 minutes.' },
-          { title: 'Add the Spinach', text: 'Add the baby spinach to the pan and stir until wilted, about 1–2 minutes. Season to taste.' },
-          { title: 'Combine & Serve', text: 'Toss the cooked pasta with the sauce. Add a splash of pasta water if needed. Plate and finish with freshly grated parmesan.' },
-        ],
-        cuisine: 'italian',
-        time: 20,
-        tags: ['Vegetarian', 'Quick'],
-        likes: 42,
-        nutrition: { calories: 630, protein: 28, fat: 18, carbs: 74 },
-      });
-      this.initLikes(this.recipe()!);
-    }
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) this.loadMockRecipe(id);
   }
 
+  /**
+   * Loads a mock recipe for direct URL access (fallback until real API is available).
+   * TODO: Replace with recipeService.getRecipeById(id) once n8n delivers persisted recipes.
+   */
+  private loadMockRecipe(id: string): void {
+    this.recipe.set({
+      id,
+      number: 1,
+      title: 'Sample Recipe',
+      description: 'Description',
+      ingredients: ['80g Pasta noodles', '100g Baby spinach', '2 Garlic cloves'],
+      extraIngredients: ['40g Parmesan cheese', '30ml Olive oil', '1 tsp Salt'],
+      directions: [
+        { title: 'Cook the Pasta', text: 'Cook your noodles in boiling, salted water until the pasta is al dente. Drain the pasta and reserve some of the pasta water.' },
+        { title: 'Prepare the Sauce', text: 'While the pasta is cooking, heat olive oil in a pan over medium heat. Add the garlic and sauté until golden. Add tomatoes, oregano, salt, and pepper, and cook for 3–4 minutes.' },
+        { title: 'Add the Spinach', text: 'Add the baby spinach to the pan and stir until wilted, about 1–2 minutes. Season to taste.' },
+        { title: 'Combine & Serve', text: 'Toss the cooked pasta with the sauce. Add a splash of pasta water if needed. Plate and finish with freshly grated parmesan.' },
+      ],
+      cuisine: 'italian',
+      time: 20,
+      tags: ['Vegetarian', 'Quick'],
+      likes: 42,
+      nutrition: { calories: 630, protein: 28, fat: 18, carbs: 74 },
+    });
+    this.initLikes(this.recipe()!);
+  }
+
+  /**
+   * Initialises the likes signal from the recipe data and attaches
+   * a real-time Firestore listener so the count updates across devices.
+   */
   private initLikes(recipe: Recipe): void {
     this.likes.set(recipe.likes ?? 0);
     this.liked.set(this.getLikedSet().has(recipe.id));
@@ -130,6 +152,7 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Cleans up the resize listener and the Firestore likes subscription. */
   ngOnDestroy(): void {
     window.removeEventListener('resize', this.onResize);
     this.unsubscribeLikes?.();

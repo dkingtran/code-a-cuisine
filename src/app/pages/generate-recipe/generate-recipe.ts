@@ -151,64 +151,73 @@ export class GenerateRecipeComponent implements OnDestroy {
    * from the Open Food Facts API (EN + DE) for ingredient names.
    */
   onIngredientNameInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const filtered = input.value.replace(/[^a-zA-ZäöüÄÖÜß\s]/g, '');
-    input.value = filtered;
-    this.ingredientName.set(filtered);
-
+    const filtered = this.sanitizeIngredientInput(event);
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
-
     const term = filtered.trim();
     if (term.length < 2) {
       this.suggestions.set([]);
       this.suggestionsOpen.set(false);
       return;
     }
+    this.debounceTimer = setTimeout(() => this.fetchSuggestions(term), 300);
+  }
 
-    this.debounceTimer = setTimeout(() => {
-      this.suggestSubscription?.unsubscribe();
-      const params = { term, tagtype: 'ingredients' };
-      const lower = term.toLowerCase();
-      let gotResults = false;
+  /** Sanitizes the ingredient name input, allowing only letters and spaces. */
+  private sanitizeIngredientInput(event: Event): string {
+    const input = event.target as HTMLInputElement;
+    const filtered = input.value.replace(/[^a-zA-ZäöüÄÖÜß\s]/g, '');
+    input.value = filtered;
+    this.ingredientName.set(filtered);
+    return filtered;
+  }
 
-      const fallback = () => {
-        const local = this.FALLBACK_INGREDIENTS
-          .filter(r => r.toLowerCase().includes(lower))
-          .slice(0, 5);
-        this.suggestions.set(local);
-        this.suggestionsOpen.set(local.length > 0);
-        this.cdr.markForCheck();
-      };
+  /** Shows local fallback suggestions filtered by the search term. */
+  private showFallbackSuggestions(lower: string): void {
+    const local = this.FALLBACK_INGREDIENTS
+      .filter(r => r.toLowerCase().includes(lower))
+      .slice(0, 5);
+    this.suggestions.set(local);
+    this.suggestionsOpen.set(local.length > 0);
+    this.cdr.markForCheck();
+  }
 
-      const req = (url: string) => this.http.get<string[]>(url, { params }).pipe(
-        timeout(4000),
-        catchError(() => EMPTY),
-      );
-      this.suggestSubscription = merge(
-        req('https://world.openfoodfacts.org/cgi/suggest.pl'),
-        req('https://de.openfoodfacts.org/cgi/suggest.pl'),
-      ).pipe(
-        scan((acc: string[], results: string[]) => {
-          const cleaned = results
-            .map(r => r.replace(/^[a-z]{2}:/i, '').trim())
-            .filter(r => r.toLowerCase().includes(lower));
-          return [...new Set([...acc, ...cleaned])].slice(0, 5);
-        }, [] as string[]),
-        finalize(() => {
-          if (!gotResults) fallback();
-        }),
-      ).subscribe({
-        next: (merged) => {
-          if (merged.length > 0) {
-            gotResults = true;
-            this.suggestions.set(merged);
-            this.suggestionsOpen.set(true);
-            this.cdr.markForCheck();
-          }
-        },
-        error: () => fallback(),
-      });
-    }, 300);
+  /** Builds a single Open Food Facts suggestion request with timeout + error handling. */
+  private buildSuggestRequest(url: string, params: Record<string, string>) {
+    return this.http.get<string[]>(url, { params }).pipe(
+      timeout(4000),
+      catchError(() => EMPTY),
+    );
+  }
+
+  /** Cancels any in-flight request, then merges EN+DE API results with local fallback. */
+  private fetchSuggestions(term: string): void {
+    this.suggestSubscription?.unsubscribe();
+    const params = { term, tagtype: 'ingredients' };
+    const lower = term.toLowerCase();
+    let gotResults = false;
+    const fallback = () => this.showFallbackSuggestions(lower);
+    this.suggestSubscription = merge(
+      this.buildSuggestRequest('https://world.openfoodfacts.org/cgi/suggest.pl', params),
+      this.buildSuggestRequest('https://de.openfoodfacts.org/cgi/suggest.pl', params),
+    ).pipe(
+      scan((acc: string[], results: string[]) => {
+        const cleaned = results
+          .map(r => r.replace(/^[a-z]{2}:/i, '').trim())
+          .filter(r => r.toLowerCase().includes(lower));
+        return [...new Set([...acc, ...cleaned])].slice(0, 5);
+      }, [] as string[]),
+      finalize(() => { if (!gotResults) fallback(); }),
+    ).subscribe({
+      next: (merged) => {
+        if (merged.length > 0) {
+          gotResults = true;
+          this.suggestions.set(merged);
+          this.suggestionsOpen.set(true);
+          this.cdr.markForCheck();
+        }
+      },
+      error: () => fallback(),
+    });
   }
 
   /** Fills the ingredient name input with the selected suggestion. */

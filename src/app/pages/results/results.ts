@@ -19,7 +19,7 @@ export class ResultsComponent implements OnInit, OnDestroy {
   private readonly recipeService = inject(RecipeService);
 
   readonly recipes = this.recipeService.generatedRecipes;
-  readonly tags = this.recipeService.generatedTags;
+  readonly tags = this.recipeService.generatedPreferenceTags;
 
   ngOnInit(): void {
     this.themeService.setBackground('#396039');

@@ -36,6 +36,11 @@ export class CookbookComponent implements OnInit {
   private scrollStartLeft = 0;
   private readonly DRAG_THRESHOLD = 5;
 
+  /**
+   * Initiates a drag-scroll session on the recipe carousel.
+   * @param event The mousedown event.
+   * @param container Optional explicit container element to scroll.
+   */
   onMouseDown(event: MouseEvent, container?: ElementRef<HTMLDivElement> | HTMLDivElement): void {
     const el = container instanceof HTMLDivElement
       ? container
@@ -49,6 +54,10 @@ export class CookbookComponent implements OnInit {
     el.style.cursor = 'grabbing';
   }
 
+  /**
+   * Handles drag-scroll movement while the mouse button is held.
+   * @param event The mousemove event.
+   */
   onMouseMove(event: MouseEvent): void {
     if (!this.isDragging || !this.activeScroll) return;
     const el = this.activeScroll;
@@ -60,6 +69,7 @@ export class CookbookComponent implements OnInit {
     el.scrollLeft = this.scrollStartLeft - delta;
   }
 
+  /** Ends the drag-scroll session and resets cursor. */
   onMouseUp(): void {
     this.isDragging = false;
     if (this.activeScroll) {
@@ -68,6 +78,10 @@ export class CookbookComponent implements OnInit {
     }
   }
 
+  /**
+   * Prevents a click event from firing after a drag gesture.
+   * @param event The click event to suppress if drag occurred.
+   */
   onScrollClick(event: MouseEvent): void {
     if (this.hasDragged) {
       event.stopPropagation();
@@ -75,6 +89,11 @@ export class CookbookComponent implements OnInit {
     }
   }
 
+  /**
+   * Navigates to the recipe detail view. Ignores the click if it was
+   * the end of a drag gesture.
+   * @param recipe The recipe to open.
+   */
   navigateToRecipe(recipe: Recipe): void {
     if (this.hasDragged) {
       this.hasDragged = false;
@@ -83,6 +102,7 @@ export class CookbookComponent implements OnInit {
     void this.router.navigate(['/recipe', recipe.id], { state: { recipe } });
   }
 
+  /** Loads all recipes from Firestore on component initialisation. */
   ngOnInit(): void {
     this.firebaseService.getRecipes().then(recipes => {
       this.recipes.set(recipes);
@@ -142,14 +162,23 @@ export class CookbookComponent implements OnInit {
     this.selectedTimeFilter.set(this.selectedTimeFilter() === value ? null : value);
   }
 
+  /**
+   * Navigates to the cuisine-specific recipe list.
+   * @param type The cuisine type key (e.g. 'italian').
+   */
   openCuisine(type: string): void {
     void this.router.navigate(['/cuisine', type]);
   }
 
+  /**
+   * Alias for openCuisine — navigates to the cuisine recipe list.
+   * @param type The cuisine type key.
+   */
   goToCuisine(type: string): void {
     void this.router.navigate(['/cuisine', type]);
   }
 
+  /** Navigates to the ingredient input page to generate a new recipe. */
   goToGenerate(): void {
     void this.router.navigate(['/generate']);
   }

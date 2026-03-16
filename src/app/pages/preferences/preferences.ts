@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, ElementRef, viewChild, Injector, afterNextRender, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, signal, ElementRef, viewChild, Injector, afterNextRender, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 import { RecipeService } from '../../shared/services/recipe.service';
@@ -41,6 +41,12 @@ export class PreferencesComponent implements OnInit {
   readonly selectedCuisine = signal<'German' | 'Italian' | 'Indian' | 'Japanese' | 'Gourmet' | 'Fusion' | null>(null);
   readonly selectedDiet = signal<'Vegetarian' | 'Vegan' | 'Keto' | 'No Preferences' | null>(null);
 
+  readonly canGenerate = computed(() =>
+    this.selectedCookingTime() !== null &&
+    this.selectedCuisine() !== null &&
+    this.selectedDiet() !== null
+  );
+
   /** Loads today's quota count from Firestore on component init. */
   ngOnInit(): void {
     void this.quotaService.loadTodayCount();
@@ -74,15 +80,15 @@ export class PreferencesComponent implements OnInit {
   }
 
   selectCookingTime(time: 'Quick' | 'Medium' | 'Complex') {
-    this.selectedCookingTime.set(time);
+    this.selectedCookingTime.update(v => v === time ? null : time);
   }
 
   selectCuisine(cuisine: 'German' | 'Italian' | 'Indian' | 'Japanese' | 'Gourmet' | 'Fusion') {
-    this.selectedCuisine.set(cuisine);
+    this.selectedCuisine.update(v => v === cuisine ? null : cuisine);
   }
 
   selectDiet(diet: 'Vegetarian' | 'Vegan' | 'Keto' | 'No Preferences') {
-    this.selectedDiet.set(diet);
+    this.selectedDiet.update(v => v === diet ? null : diet);
   }
 
   /**
@@ -91,47 +97,58 @@ export class PreferencesComponent implements OnInit {
    */
   generateRecipe(): void {
     if (this.quotaService.isGlobalExhausted()) {
-      this.showQuotaModal.set('global');
-      document.body.style.overflow = 'hidden';
-      afterNextRender(() => {
-        this.quotaBoxRef()?.nativeElement.focus();
-      }, { injector: this.injector });
+      this.openQuotaModal('global');
       return;
     }
     this.loadingService.show();
     this.preferencesService.setPersons(this.persons());
-    const preferences = {
+    this.recipeService.generateRecipe(this.buildPreferences()).subscribe({
+      next: () => this.handleGenerateSuccess(),
+      error: (err: unknown) => this.handleGenerateError(err),
+    });
+  }
+
+  /** Builds the preferences object from the current signal values. */
+  private buildPreferences() {
+    return {
       portions: this.portions(),
       persons: this.persons(),
       cookingTime: this.selectedCookingTime(),
       cuisine: this.selectedCuisine(),
       diet: this.selectedDiet(),
     };
-    this.recipeService.generateRecipe(preferences).subscribe({
-      next: () => {
-        this.quotaService.incrementUsed();
-        this.loadingService.hide();
-        void this.router.navigate(['/results']);
-      },
-      error: (err: unknown) => {
-        this.loadingService.hide();
-        const message = err instanceof Error ? err.message : '';
-        if (message.startsWith('QUOTA_EXCEEDED:')) {
-          const type = message.split(':')[1] as 'ip' | 'global';
-          this.showQuotaModal.set(type);
-          document.body.style.overflow = 'hidden';
-          afterNextRender(() => {
-            this.quotaBoxRef()?.nativeElement.focus();
-          }, { injector: this.injector });
-        } else {
-          this.showInsufficientModal.set(true);
-          document.body.style.overflow = 'hidden';
-          afterNextRender(() => {
-            this.modalBoxRef()?.nativeElement.focus();
-          }, { injector: this.injector });
-        }
-      },
-    });
+  }
+
+  /** Opens the quota-exceeded modal and focuses it for accessibility. */
+  private openQuotaModal(type: 'ip' | 'global'): void {
+    this.showQuotaModal.set(type);
+    document.body.style.overflow = 'hidden';
+    afterNextRender(() => this.quotaBoxRef()?.nativeElement.focus(), { injector: this.injector });
+  }
+
+  /** Opens the insufficient-ingredients modal and focuses it. */
+  private openInsufficientModal(): void {
+    this.showInsufficientModal.set(true);
+    document.body.style.overflow = 'hidden';
+    afterNextRender(() => this.modalBoxRef()?.nativeElement.focus(), { injector: this.injector });
+  }
+
+  /** Handles a successful recipe generation response. */
+  private handleGenerateSuccess(): void {
+    this.quotaService.incrementUsed();
+    this.loadingService.hide();
+    void this.router.navigate(['/results']);
+  }
+
+  /** Handles an error during recipe generation, showing the appropriate modal. */
+  private handleGenerateError(err: unknown): void {
+    this.loadingService.hide();
+    const message = err instanceof Error ? err.message : '';
+    if (message.startsWith('QUOTA_EXCEEDED:')) {
+      this.openQuotaModal(message.split(':')[1] as 'ip' | 'global');
+    } else {
+      this.openInsufficientModal();
+    }
   }
 
   /** Closes the insufficient-ingredients modal and restores page scroll. */

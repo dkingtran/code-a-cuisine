@@ -75,10 +75,17 @@
     text-align: center;
     color: #396039;
     font-size: clamp(16px, 2vw, 20px);
+    font-weight: 500;
     padding: 48px 0;
 
     p {
         margin-bottom: 24px;
+    }
+}
+
+.cuisine-empty {
+    p {
+        margin-bottom: 0;
     }
 }
 

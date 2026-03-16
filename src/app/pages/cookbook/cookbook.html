@@ -69,7 +69,7 @@
           <span class="filter-label"><app-svg-icon name="clock" size="18" />Time</span>
           <div class="filter-chips">
             <button type="button" class="tags-btn" [class.selected]="selectedTimeFilter() === 'quick'" (click)="setTimeFilter('quick')" [attr.aria-pressed]="selectedTimeFilter() === 'quick'">Quick (&le;20 min)</button>
-            <button type="button" class="tags-btn" [class.selected]="selectedTimeFilter() === 'medium'" (click)="setTimeFilter('medium')" [attr.aria-pressed]="selectedTimeFilter() === 'medium'">Medium (21–45 min)</button>
+            <button type="button" class="tags-btn" [class.selected]="selectedTimeFilter() === 'medium'" (click)="setTimeFilter('medium')" [attr.aria-pressed]="selectedTimeFilter() === 'medium'">Medium (20–45 min)</button>
             <button type="button" class="tags-btn" [class.selected]="selectedTimeFilter() === 'complex'" (click)="setTimeFilter('complex')" [attr.aria-pressed]="selectedTimeFilter() === 'complex'">Complex (&gt;45 min)</button>
           </div>
         </div>

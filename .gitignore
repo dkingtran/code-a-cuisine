@@ -46,10 +46,11 @@ Thumbs.db
 # GitHub Copilot Instructions
 .github/copilot-instructions.md
 
-# Environment files with secrets (use environment.ts.example as template)
+# Environment files with secrets (use *.example as template)
 src/environments/environment.ts
+src/environments/environment.prod.ts
 
 # n8n workflow files with embedded credentials
 Code A Cuisine (12).json
 Code A Cuisine (13).json
-src/environments/environment.prod.ts
+Code A Cuisine (15).json
