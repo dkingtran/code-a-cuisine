@@ -245,6 +245,32 @@
         }
     }
 
+    .all-recipes-count-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+
+        button {
+            font-size: 20px;
+            gap: 2px;
+        }
+
+        @media (max-width: 480px) {
+            flex-direction: column-reverse;
+            align-items: flex-start;
+        }
+
+    }
+
+    .all-recipes-count {
+        font-size: clamp(16px, 3vw, 20px);
+        font-weight: 600;
+        color: black;
+        opacity: 0.8;
+        padding-left: 0.5rem;
+    }
+
     .all-recipes-status {
         font-size: 16px;
         color: #1E5515;

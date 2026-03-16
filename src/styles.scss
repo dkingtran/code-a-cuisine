@@ -249,9 +249,9 @@ a {
     @include flex-layout(row, center, center);
     gap: 10px;
     width: fit-content;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border: none;
-    border-radius: 8px;
+    border-radius: 2px;
     font-size: 14px;
     background-color: transparent;
     color: #1E5515;
@@ -262,7 +262,7 @@ a {
     transition: all 0.125s ease;
 
     &:hover {
-        transform: scale(1.02);
+        background-color: #D7DFD7;
     }
 
     img,

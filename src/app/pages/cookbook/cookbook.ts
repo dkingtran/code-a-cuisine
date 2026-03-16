@@ -133,6 +133,9 @@ export class CookbookComponent implements OnInit {
   /** Active time filter value, or null for no filter. */
   readonly selectedTimeFilter = signal<'quick' | 'medium' | 'complex' | null>(null);
 
+  /** Whether the filtered recipes are sorted by likes descending. */
+  readonly sortByLikes = signal(false);
+
   /** Recipes filtered by the currently active cuisine, diet and time filters. */
   readonly filteredRecipes = computed(() => {
     let result = this.recipes();
@@ -144,8 +147,14 @@ export class CookbookComponent implements OnInit {
     if (time === 'quick') result = result.filter(r => r.time <= 20);
     else if (time === 'medium') result = result.filter(r => r.time > 20 && r.time <= 45);
     else if (time === 'complex') result = result.filter(r => r.time > 45);
+    if (this.sortByLikes()) result = [...result].sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0));
     return result;
   });
+
+  /** Toggles the most-liked sort — deselects if already active. */
+  toggleSortByLikes(): void {
+    this.sortByLikes.update(v => !v);
+  }
 
   /** Toggles the cuisine filter — deselects if already active. */
   setCuisineFilter(value: string): void {

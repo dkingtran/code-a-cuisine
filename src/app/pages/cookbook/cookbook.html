@@ -104,6 +104,13 @@
           </div>
         </div>
       </div>
+      <div class="all-recipes-count-row">
+        <p class="all-recipes-count" aria-live="polite">{{ filteredRecipes().length }} {{ filteredRecipes().length === 1 ? 'Recipe' : 'Recipes' }}</p>
+        <button type="button" class="tags-btn" [class.selected]="sortByLikes()" (click)="toggleSortByLikes()" [attr.aria-pressed]="sortByLikes()">
+          <app-svg-icon name="heart" size="16" />
+          Most Liked
+        </button>
+      </div>
       @if (loading()) {
         <p class="all-recipes-status" aria-live="polite">Loading recipes...</p>
       } @else if (loadError()) {
