@@ -4,6 +4,7 @@ import { Observable, map, tap } from 'rxjs';
 import { Recipe, Cuisine } from '../models/recipe.model';
 import { LoggerService } from '../../core/services/logger.service';
 import { FirebaseService } from './firebase.service';
+import { environment } from '../../../environments/environment';
 
 interface StoredIngredient {
   id: number;
@@ -75,7 +76,7 @@ export class RecipeService {
     const raw = localStorage.getItem(INGREDIENTS_KEY);
     const ingredients: StoredIngredient[] = raw ? JSON.parse(raw) : [];
     const body = { ...preferences, ingredients };
-    return this.http.post('/api/generate', body, { responseType: 'text' }).pipe(
+    return this.http.post(environment.n8nWebhookUrl, body, { responseType: 'text' }).pipe(
       map(response => parseRecipeResponse(response)),
       tap(recipes => {
         this.generatedRecipes.set(recipes);

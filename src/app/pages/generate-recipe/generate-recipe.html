@@ -76,7 +76,12 @@
         </div>
 
         <div class="second-container">
-            <p class="list-title">List of your Ingredients</p>
+            <div class="list-title-row">
+              <p class="list-title">List of your Ingredients</p>
+              @if (ingredients().length > 0) {
+                <button type="button" class="unit-toggle" (click)="clearIngredients()" aria-label="Clear all ingredients"><p>Clear all</p></button>
+              }
+            </div>
             <ul class="ingredient-list">
                 @for (item of ingredients(); track item.id) {
                     <li class="ingredient-item" [class.editing]="editingIngredient() === item.id" [class.dropdown-open]="editingDropdownOpen() === item.id">

@@ -137,6 +137,7 @@ export class PreferencesComponent implements OnInit {
   private handleGenerateSuccess(): void {
     this.quotaService.incrementUsed();
     this.loadingService.hide();
+    localStorage.removeItem('cac_ingredients');
     void this.router.navigate(['/results']);
   }
 

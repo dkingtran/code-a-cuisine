@@ -2,6 +2,7 @@
 // Diese Datei wird committed. Die echte `environment.prod.ts` ist in .gitignore.
 export const environment = {
     production: true,
+    n8nWebhookUrl: 'YOUR_N8N_WEBHOOK_URL',
     firebase: {
         apiKey: 'YOUR_FIREBASE_API_KEY',
         authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',

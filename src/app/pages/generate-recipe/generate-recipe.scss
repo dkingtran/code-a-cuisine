@@ -21,6 +21,16 @@
     gap: 32px;
     flex-wrap: wrap;
     align-items: flex-start;
+
+    @media (max-width: 900px) {
+        flex-direction: column;
+
+        .first-container,
+        .second-container {
+            flex: 0 0 auto;
+            width: 100%;
+        }
+    }
 }
 
 .first-container {
@@ -237,15 +247,65 @@
 
 .second-container {
     @include flex-layout(column);
-    gap: 16px;
+    gap: 12px;
     @include green-container;
     flex: 1 1 300px;
+}
+
+.list-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    @media (max-width: 400px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+
+        .clear-all-btn {
+            padding: 0;
+            display: flex;
+            align-self: start;
+        }
+    }
+
+    .unit-toggle {
+
+        p {
+            color: #d12a17;
+            opacity: 0.8;
+            transition: all 0.15s ease;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
 }
 
 .list-title {
     @include font-color-green;
     font-weight: 500;
     font-size: 20px;
+    margin-bottom: 0;
+}
+
+.clear-all-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: inherit;
+    color: #c0392b;
+    opacity: 0.8;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: opacity 0.15s;
+
+    &:hover {
+        opacity: 1;
+    }
 }
 
 .ingredient-list {

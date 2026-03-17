@@ -131,6 +131,11 @@ export class GenerateRecipeComponent implements OnDestroy {
     this.ingredients.update(list => list.filter(i => i.id !== id));
   }
 
+  /** Clears all ingredients from the list and localStorage. */
+  clearIngredients(): void {
+    this.ingredients.set([]);
+  }
+
   editIngredient(ingredient: Ingredient): void {
     if (this.editingIngredient() === ingredient.id) {
       // Save changes

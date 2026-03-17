@@ -76,6 +76,8 @@
     @if (isQuotaLoading()) {
       <span class="quota-info__text">Loading quota...</span>
     } @else {
+      
+      <span class="quota-info__hint">Each generation uses 3 recipes</span>
       <span class="quota-info__text" [class.quota-info__text--low]="globalRemaining() <= 3" [class.quota-info__text--empty]="globalRemaining() === 0">
         {{ globalRemaining() }} of {{ GLOBAL_LIMIT }} daily recipes remaining
       </span>
