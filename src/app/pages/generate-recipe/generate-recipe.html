@@ -14,7 +14,7 @@
                             placeholder="Pasta"
                             [value]="ingredientName()"
                             (input)="onIngredientNameInput($event)"
-                            (blur)="closeSuggestionsDelayed()"
+                            (keydown.escape)="closeSuggestions()"
                         >
                         @if (suggestionsOpen()) {
                             <ul class="suggestions-list" role="listbox" aria-label="Ingredient suggestions">

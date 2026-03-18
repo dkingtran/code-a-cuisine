@@ -227,11 +227,6 @@ export class GenerateRecipeComponent implements OnDestroy {
     this.suggestionsOpen.set(false);
   }
 
-  /** Closes suggestions after a short delay, allowing suggestion clicks to register first. */
-  closeSuggestionsDelayed(): void {
-    setTimeout(() => this.suggestionsOpen.set(false), 150);
-  }
-
   onServingAmountInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const filtered = input.value.replace(/[^0-9]/g, '').slice(0, 4);
