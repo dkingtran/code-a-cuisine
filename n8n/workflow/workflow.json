@@ -3,81 +3,100 @@
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "YOUR_WEBHOOK_PATH",
-        "responseMode": "responseNode",
-        "options": {}
+        "respondWith": "json",
+        "responseBody": "{ \"error\": \"Internal workflow error\", \"code\": \"WORKFLOW_ERROR\" }",
+        "options": {
+          "responseCode": 500
+        }
       },
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
       "position": [
-        -880,
-        112
+        224,
+        480
       ],
-      "id": "978eea3e-cc6f-4666-824d-456701883a7c",
-      "name": "Webhook",
-      "webhookId": "YOUR_WEBHOOK_PATH"
+      "id": "c45447eb-8600-4304-8612-8391dde0507b",
+      "name": "Respond - Workflow Error"
     },
     {
-      "parameters": {
-        "jsCode": "// ─── SERVER-SIDE GLOBAL QUOTA CHECK ───────────────────────────────────────\n// Requires n8n 0.218+  ($http helper available in Code nodes)\n//\n// HOW TO CONFIGURE:\n//   1. Set PROJECT_ID  → Firebase console → Project settings → Project ID\n//   2. Set API_KEY     → Firebase console → Project settings → Web API Key\n//   3. Make sure your Firestore rules allow reads for the 'recipes' collection\n//      without authentication (the Web API Key does NOT bypass security rules).\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst GLOBAL_LIMIT = 12;\nconst PROJECT_ID   = 'YOUR_FIREBASE_PROJECT_ID';\nconst API_KEY      = 'YOUR_FIREBASE_API_KEY';\n\n// Extract client IP\nconst ip = $input.item.json.headers?.['x-forwarded-for']?.split(',')[0]?.trim()\n         || $input.item.json.headers?.['x-real-ip']\n         || 'unknown';\n\n// Today midnight UTC as ISO string (e.g. \"2026-03-14T00:00:00.000Z\")\nconst now        = new Date();\nconst todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));\nconst todayISO   = todayStart.toISOString();\n\n// Query Firestore: count recipes created today\nlet globalCount = 0;\ntry {\n  const response = await $http.request({\n    method:  'POST',\n    url:     'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents:runQuery?key=' + API_KEY,\n    headers: { 'Content-Type': 'application/json' },\n    body:    JSON.stringify({\n      structuredQuery: {\n        from:  [{ collectionId: 'recipes' }],\n        where: {\n          fieldFilter: {\n            field: { fieldPath: 'createdAt' },\n            op:    'GREATER_THAN_OR_EQUAL',\n            value: { timestampValue: todayISO }\n          }\n        },\n        limit: GLOBAL_LIMIT + 1\n      }\n    })\n  });\n\n  // Firestore runQuery returns an array; non-empty results have a 'document' field.\n  const results  = Array.isArray(response) ? response : [response];\n  globalCount    = results.filter(r => r && r.document).length;\n} catch (e) {\n  // If the quota check itself fails (network issue, wrong credentials, etc.),\n  // we fail open so users are not blocked due to an infrastructure error.\n  globalCount = 0;\n}\n\nconst quotaStatus = globalCount >= GLOBAL_LIMIT ? 'QUOTA_EXCEEDED:global' : 'ok';\n\nreturn [{\n  json: {\n    ...$input.item.json,\n    ip,\n    todayISO,\n    globalCount,\n    quotaStatus\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
       "position": [
-        -656,
-        112
+        0,
+        480
       ],
-      "id": "ac27b62a-ebc2-44a6-9a4d-eb0d16d2ec9b",
-      "name": "Check Global Quota"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "aa11bb22-cc33-dd44-ee55-ff6677889900",
-              "leftValue": "={{ $json.quotaStatus }}",
-              "rightValue": "ok",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        -432,
-        112
-      ],
-      "id": "4389c0fa-96ba-4f46-8920-14e169426333",
-      "name": "Quota OK?"
+      "id": "0d8649b0-c097-45ac-a135-2e68765a4f24",
+      "name": "Error Handler"
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "{ \"quotaExceeded\": true, \"type\": \"global\" }",
+        "responseBody": "{ \"error\": \"No ingredients provided\", \"code\": \"INVALID_INPUT\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        336
+      ],
+      "id": "fc86929a-18f0-45dc-8968-dbc630dcead4",
+      "name": "Respond - Invalid Input"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        192
+      ],
+      "id": "4043ed4f-075e-471c-bdb3-1c20246ac0a0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.output }}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        -432,
-        384
+        304,
+        0
       ],
-      "id": "2fb4bd8f-e98e-488b-943f-f0de0cb60ac1",
-      "name": "Respond - Quota Exceeded"
+      "id": "6794c4ce-2d8f-4fcd-be45-29968dfe9b81",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a professional chef AI. The user sends you ingredients and cooking preferences.\nThe ingredient names may be provided in German, English, or a mix of both languages. Recognize and process them regardless of which language they are written in. Treat \"Pfeffer\" and \"pepper\", \"Salz\" and \"salt\", etc. as the same ingredient.\nGenerate exactly 3 recipes and return ONLY a valid JSON array. No explanation, no markdown code blocks, no extra text — pure JSON only.\n\nEach recipe must follow this exact structure:\n[\n  {\n    \"id\": \"1\",\n    \"number\": 1,\n    \"title\": \"Recipe Title\",\n    \"description\": \"Short 1-2 sentence description\",\n    \"cuisine\": \"italian\",\n    \"time\": 20,\n    \"tags\": [\"Vegetarian\", \"Quick\"],\n    \"ingredients\": [\"320g Pasta\", \"400g Tomatoes\"],\n    \"extraIngredients\": [\"Fresh Basil\"],\n    \"directions\": [\n      { \"title\": \"Step title\", \"text\": \"Step description.\" }\n    ],\n    \"nutrition\": { \"calories\": 580, \"protein\": 16, \"fat\": 8, \"carbs\": 95 },\n    \"likes\": 0\n  }\n]\n\nRules:\n- cuisine must be lowercase (e.g. \"italian\", \"german\", \"japanese\", \"indian\", \"gourmet\", \"fusion\")\n- time is a number (minutes)\n- tags only from: Quick, Medium, Complex, Vegetarian, Vegan, Keto\n- The tags array MUST include the cookingTime value (e.g. if cookingTime is \"Complex\", \"Complex\" MUST appear in tags). If diet is not \"No Preferences\", it MUST also appear in tags.\n- id must be \"1\", \"2\", \"3\" as strings\n- number must be 1, 2, 3 as integers\n- ingredients: STRICTLY ONLY ingredients that appear word-for-word in the user's \"Ingredients\" list below. FORBIDDEN: Do NOT invent, add, or infer any ingredient — not even if it \"fits\" the recipe. If you add an ingredient the user did not provide (e.g. \"Salmon\", \"Asparagus\") to this field, that is a critical error. Format each with amount and unit (e.g. \"200g Parmesan\").\n- extraIngredients: ONLY additional ingredients NOT in the user's list that the recipe also requires (e.g. spices, oil, stock). If none are needed, use an empty array [].\n- Quick means up to 20 minutes. The time field MUST be between 5 and 20.\n- Medium means 20–45 minutes. The time field MUST be between 20 and 45.\n- Complex means over 45 minutes. The time field MUST be 46 or higher.\n- The time field MUST strictly match the cookingTime preference sent by the user. If cookingTime is \"Complex\", ALL 3 recipes MUST have time >= 46.\n- The cuisine field in every recipe MUST match the cuisine preference sent by the user. If cuisine is \"Gourmet\", ALL 3 recipes must be sophisticated, restaurant-quality dishes.\n- ALL 3 recipes MUST use the provided ingredients as the main components. Do not generate recipes that ignore the user's ingredients.\n- If the diet preference contradicts some ingredients (e.g. \"Vegan\" with \"Beef\"), ignore the conflicting ingredients and still generate 3 valid recipes that match the diet. Never return an error — always return a valid JSON array.\n- Recipe titles and all text content MUST be in English.\n- Each direction step MUST include an estimated time in its text (e.g. \"Cook for 5 minutes\" or \"Bake for 30 minutes\").\n- If persons > 1, distribute the direction steps across persons. Prefix each step title with \"Person 1:\", \"Person 2:\", etc. where parallel work is possible. Steps that require all persons should be prefixed with \"All:\".\n\nCRITICAL EXAMPLE — What NOT to do:\nUser provides: \"Lemon, Butter, Parmesan, Strawberry\"\nWRONG ingredients field:   [\"300g Salmon\", \"200g Asparagus\", \"1 Lemon\", \"50g Butter\"]  \u2190 Salmon and Asparagus were NOT provided by the user!\nCORRECT ingredients field: [\"1 Lemon\", \"50g Butter\", \"50g Parmesan\", \"150g Strawberry\"]\nCORRECT extraIngredients field: [\"Olive Oil\", \"Salt\", \"Pepper\"]\n\nIngredients: {{ $('Webhook').item.json.body.ingredients }}\nNote: Ingredients are provided as a comma-separated string in the format \"amountunit name\" (e.g. \"200g Chicken, 100ml Cream, 1pc Onion\"). Use ONLY these exact ingredient names.\nPortions: {{ $('Webhook').item.json.body.portions }}\nPersons: {{ $('Webhook').item.json.body.persons }}\nCooking time: {{ $('Webhook').item.json.body.cookingTime }}\nCuisine: {{ $('Webhook').item.json.body.cuisine }}\nDiet: {{ $('Webhook').item.json.body.diet }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c254f008-d91a-4349-83a9-96a45f9dd19c",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -115,139 +134,112 @@
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "You are a professional chef AI. The user sends you ingredients and cooking preferences.\nThe ingredient names may be provided in German, English, or a mix of both languages. Recognize and process them regardless of which language they are written in. Treat \"Pfeffer\" and \"pepper\", \"Salz\" and \"salt\", etc. as the same ingredient.\nGenerate exactly 3 recipes and return ONLY a valid JSON array. No explanation, no markdown code blocks, no extra text — pure JSON only.\n\nEach recipe must follow this exact structure:\n[\n  {\n    \"id\": \"1\",\n    \"number\": 1,\n    \"title\": \"Recipe Title\",\n    \"description\": \"Short 1-2 sentence description\",\n    \"cuisine\": \"italian\",\n    \"time\": 20,\n    \"tags\": [\"Vegetarian\", \"Quick\"],\n    \"ingredients\": [\"320g Pasta\", \"400g Tomatoes\"],\n    \"extraIngredients\": [\"Fresh Basil\"],\n    \"directions\": [\n      { \"title\": \"Step title\", \"text\": \"Step description.\" }\n    ],\n    \"nutrition\": { \"calories\": 580, \"protein\": 16, \"fat\": 8, \"carbs\": 95 },\n    \"likes\": 0\n  }\n]\n\nRules:\n- cuisine must be lowercase (e.g. \"italian\", \"german\", \"japanese\", \"indian\", \"gourmet\", \"fusion\")\n- time is a number (minutes)\n- tags only from: Quick, Medium, Complex, Vegetarian, Vegan, Keto\n- The tags array MUST include the cookingTime value (e.g. if cookingTime is \"Complex\", \"Complex\" MUST appear in tags). If diet is not \"No Preferences\", it MUST also appear in tags.\n- id must be \"1\", \"2\", \"3\" as strings\n- number must be 1, 2, 3 as integers\n- ingredients: STRICTLY ONLY ingredients that appear word-for-word in the user's \"Ingredients\" list below. FORBIDDEN: Do NOT invent, add, or infer any ingredient — not even if it \"fits\" the recipe. If you add an ingredient the user did not provide (e.g. \"Salmon\", \"Asparagus\") to this field, that is a critical error. Format each with amount and unit (e.g. \"200g Parmesan\").\n- extraIngredients: ONLY additional ingredients NOT in the user's list that the recipe also requires (e.g. spices, oil, stock). If none are needed, use an empty array [].\n- Quick means up to 20 minutes. The time field MUST be between 5 and 20.\n- Medium means 20–45 minutes. The time field MUST be between 20 and 45.\n- Complex means over 45 minutes. The time field MUST be 46 or higher.\n- The time field MUST strictly match the cookingTime preference sent by the user. If cookingTime is \"Complex\", ALL 3 recipes MUST have time >= 46.\n- The cuisine field in every recipe MUST match the cuisine preference sent by the user. If cuisine is \"Gourmet\", ALL 3 recipes must be sophisticated, restaurant-quality dishes.\n- ALL 3 recipes MUST use the provided ingredients as the main components. Do not generate recipes that ignore the user's ingredients.\n- If the diet preference contradicts some ingredients (e.g. \"Vegan\" with \"Beef\"), ignore the conflicting ingredients and still generate 3 valid recipes that match the diet. Never return an error — always return a valid JSON array.\n- Recipe titles and all text content MUST be in English.\n- Each direction step MUST include an estimated time in its text (e.g. \"Cook for 5 minutes\" or \"Bake for 30 minutes\").\n- If persons > 1, distribute the direction steps across persons. Prefix each step title with \"Person 1:\", \"Person 2:\", etc. where parallel work is possible. Steps that require all persons should be prefixed with \"All:\".\n\nCRITICAL EXAMPLE — What NOT to do:\nUser provides: \"Lemon, Butter, Parmesan, Strawberry\"\nWRONG ingredients field:   [\"300g Salmon\", \"200g Asparagus\", \"1 Lemon\", \"50g Butter\"]  ← Salmon and Asparagus were NOT provided by the user!\nCORRECT ingredients field: [\"1 Lemon\", \"50g Butter\", \"50g Parmesan\", \"150g Strawberry\"]\nCORRECT extraIngredients field: [\"Olive Oil\", \"Salt\", \"Pepper\"]\n\nIngredients: {{ $('Webhook').item.json.body.ingredients }}
-Note: Ingredients are provided as a comma-separated string in the format "amountunit name" (e.g. "200g Chicken, 100ml Cream, 1pc Onion"). Use ONLY these exact ingredient names.\nPortions: {{ $('Webhook').item.json.body.portions }}\nPersons: {{ $('Webhook').item.json.body.persons }}\nCooking time: {{ $('Webhook').item.json.body.cookingTime }}\nCuisine: {{ $('Webhook').item.json.body.cuisine }}\nDiet: {{ $('Webhook').item.json.body.diet }}",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3,
-      "position": [
-        0,
-        0
-      ],
-      "id": "c254f008-d91a-4349-83a9-96a45f9dd19c",
-      "name": "AI Agent",
-      "retryOnFail": true,
-      "waitBetweenTries": 5000
-    },
-    {
-      "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ $json.output }}",
+        "responseBody": "{ \"quotaExceeded\": true, \"type\": \"global\" }",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        304,
-        0
+        -432,
+        384
       ],
-      "id": "6794c4ce-2d8f-4fcd-be45-29968dfe9b81",
-      "name": "Respond to Webhook"
+      "id": "2fb4bd8f-e98e-488b-943f-f0de0cb60ac1",
+      "name": "Respond - Quota Exceeded"
     },
     {
       "parameters": {
-        "modelName": "models/gemini-flash-latest",
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "aa11bb22-cc33-dd44-ee55-ff6677889900",
+              "leftValue": "={{ $json.quotaStatus }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
       "position": [
-        -16,
-        192
+        -432,
+        112
       ],
-      "id": "4043ed4f-075e-471c-bdb3-1c20246ac0a0",
-      "name": "Google Gemini Chat Model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "YOUR_CREDENTIAL_ID",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
+      "id": "4389c0fa-96ba-4f46-8920-14e169426333",
+      "name": "Quota OK?"
     },
     {
       "parameters": {
-        "respondWith": "json",
-        "responseBody": "{ \"error\": \"No ingredients provided\", \"code\": \"INVALID_INPUT\" }",
-        "options": {
-          "responseCode": 400
-        }
+        "jsCode": "// \u2500\u2500\u2500 SERVER-SIDE GLOBAL QUOTA CHECK \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n// Requires n8n 0.218+  ($http helper available in Code nodes)\n//\n// HOW TO CONFIGURE:\n//   1. Set PROJECT_ID  \u2192 Firebase console \u2192 Project settings \u2192 Project ID\n//   2. Set API_KEY     \u2192 Firebase console \u2192 Project settings \u2192 Web API Key\n//   3. Make sure your Firestore rules allow reads for the 'recipes' collection\n//      without authentication (the Web API Key does NOT bypass security rules).\n// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\nconst GLOBAL_LIMIT = 12;\nconst PROJECT_ID   = 'YOUR_FIREBASE_PROJECT_ID';\nconst API_KEY      = 'YOUR_FIREBASE_API_KEY';\n\n// Extract client IP\nconst ip = $input.item.json.headers?.['x-forwarded-for']?.split(',')[0]?.trim()\n         || $input.item.json.headers?.['x-real-ip']\n         || 'unknown';\n\n// Today midnight UTC as ISO string (e.g. \"2026-03-14T00:00:00.000Z\")\nconst now        = new Date();\nconst todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));\nconst todayISO   = todayStart.toISOString();\n\n// Query Firestore: count recipes created today\nlet globalCount = 0;\ntry {\n  const response = await $http.request({\n    method:  'POST',\n    url:     'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents:runQuery?key=' + API_KEY,\n    headers: { 'Content-Type': 'application/json' },\n    body:    JSON.stringify({\n      structuredQuery: {\n        from:  [{ collectionId: 'recipes' }],\n        where: {\n          fieldFilter: {\n            field: { fieldPath: 'createdAt' },\n            op:    'GREATER_THAN_OR_EQUAL',\n            value: { timestampValue: todayISO }\n          }\n        },\n        limit: GLOBAL_LIMIT + 1\n      }\n    })\n  });\n\n  // Firestore runQuery returns an array; non-empty results have a 'document' field.\n  const results  = Array.isArray(response) ? response : [response];\n  globalCount    = results.filter(r => r && r.document).length;\n} catch (e) {\n  // If the quota check itself fails (network issue, wrong credentials, etc.),\n  // we fail open so users are not blocked due to an infrastructure error.\n  globalCount = 0;\n}\n\nconst quotaStatus = globalCount >= GLOBAL_LIMIT ? 'QUOTA_EXCEEDED:global' : 'ok';\n\nreturn [{\n  json: {\n    ...$input.item.json,\n    ip,\n    todayISO,\n    globalCount,\n    quotaStatus\n  }\n}];"
       },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        0,
-        336
+        -656,
+        112
       ],
-      "id": "fc86929a-18f0-45dc-8968-dbc630dcead4",
-      "name": "Respond - Invalid Input"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.errorTrigger",
-      "typeVersion": 1,
-      "position": [
-        0,
-        480
-      ],
-      "id": "0d8649b0-c097-45ac-a135-2e68765a4f24",
-      "name": "Error Handler"
+      "id": "ac27b62a-ebc2-44a6-9a4d-eb0d16d2ec9b",
+      "name": "Check Global Quota"
     },
     {
       "parameters": {
-        "respondWith": "json",
-        "responseBody": "{ \"error\": \"Internal workflow error\", \"code\": \"WORKFLOW_ERROR\" }",
-        "options": {
-          "responseCode": 500
-        }
+        "httpMethod": "POST",
+        "path": "YOUR_WEBHOOK_PATH",
+        "responseMode": "responseNode",
+        "options": {}
       },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
       "position": [
-        224,
-        480
+        -880,
+        112
       ],
-      "id": "c45447eb-8600-4304-8612-8391dde0507b",
-      "name": "Respond - Workflow Error"
+      "id": "978eea3e-cc6f-4666-824d-456701883a7c",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_PATH"
     }
   ],
   "pinData": {},
   "connections": {
-    "Webhook": {
+    "Error Handler": {
       "main": [
         [
           {
-            "node": "Check Global Quota",
+            "node": "Respond - Workflow Error",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Check Global Quota": {
-      "main": [
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
         [
           {
-            "node": "Quota OK?",
-            "type": "main",
+            "node": "AI Agent",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]
       ]
     },
-    "Quota OK?": {
+    "AI Agent": {
       "main": [
         [
           {
-            "node": "Validate Input",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Respond - Quota Exceeded",
+            "node": "Respond to Webhook",
             "type": "main",
             "index": 0
           }
@@ -272,33 +264,40 @@ Note: Ingredients are provided as a comma-separated string in the format "amount
         ]
       ]
     },
-    "AI Agent": {
+    "Quota OK?": {
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Quota Exceeded",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
+    "Check Global Quota": {
+      "main": [
         [
           {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
+            "node": "Quota OK?",
+            "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Error Handler": {
+    "Webhook": {
       "main": [
         [
           {
-            "node": "Respond - Workflow Error",
+            "node": "Check Global Quota",
             "type": "main",
             "index": 0
           }
