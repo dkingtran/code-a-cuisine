@@ -60,7 +60,8 @@
                 }
               ],
               "outputHashing": "all",
-              "sourceMap": true
+              "sourceMap": true,
+              "namedChunks": true
             },
             "development": {
               "optimization": false,
