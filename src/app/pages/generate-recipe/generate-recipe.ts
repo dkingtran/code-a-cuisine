@@ -75,9 +75,10 @@ export class GenerateRecipeComponent implements OnDestroy {
 
   readonly containerPaddingBottom = computed(() => {
     const base = 'clamp(16px, 2.5vw, 25px)';
-    if (this.dropdownOpen()) return `calc(${base} + 108px)`;
-    if (this.suggestionsOpen()) return `calc(${base} + ${this.suggestions().length * 36}px)`;
-    return null;
+    const dropdownExtra = this.dropdownOpen() ? 108 : 0;
+    const suggestionsExtra = this.suggestionsOpen() ? this.suggestions().length * 36 : 0;
+    const extra = Math.max(dropdownExtra, suggestionsExtra);
+    return extra > 0 ? `calc(${base} + ${extra}px)` : null;
   });
 
   /** Returns the short display label for a unit ('g', 'ml', 'pc'). */
