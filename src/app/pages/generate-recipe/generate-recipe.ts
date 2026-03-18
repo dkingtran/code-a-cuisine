@@ -1,8 +1,8 @@
 import { Component, signal, computed, effect, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { merge, Subscription, EMPTY, of } from 'rxjs';
-import { timeout, catchError, scan, finalize } from 'rxjs/operators';
+import { Subscription, EMPTY } from 'rxjs';
+import { timeout, catchError, finalize } from 'rxjs/operators';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 
 interface Ingredient {
@@ -41,10 +41,6 @@ export class GenerateRecipeComponent implements OnDestroy {
     'Soy sauce', 'Vinegar', 'Mustard', 'Ketchup', 'Mayonnaise', 'Cream cheese',
     'Parmesan', 'Mozzarella', 'Cheddar', 'Tofu', 'Coconut milk', 'Oats',
     'Almonds', 'Walnuts', 'Peanuts', 'Sesame', 'Sunflower seeds', 'Pumpkin seeds',
-    'Pfeffer', 'Salz', 'Zucker', 'Mehl', 'Ei', 'Milch', 'Sahne', 'Knoblauch',
-    'Zwiebel', 'Tomate', 'Kartoffel', 'Karotte', 'Hähnchen', 'Rindfleisch',
-    'Lachs', 'Zitrone', 'Apfel', 'Erdbeere', 'Spinat', 'Paprika', 'Pilze',
-    'Ingwer', 'Honig', 'Senf', 'Essig', 'Kokosmilch', 'Mandeln', 'Walnüsse',
   ];
 
   readonly units = ['gram', 'ml', 'piece'] as const;
@@ -194,29 +190,24 @@ export class GenerateRecipeComponent implements OnDestroy {
     );
   }
 
-  /** Cancels any in-flight request, then merges EN+DE API results with local fallback. */
+  /** Cancels any in-flight request, then fetches EN-only suggestions with local fallback. */
   private fetchSuggestions(term: string): void {
     this.suggestSubscription?.unsubscribe();
     const params = { term, tagtype: 'ingredients' };
     const lower = term.toLowerCase();
     let gotResults = false;
     const fallback = () => this.showFallbackSuggestions(lower);
-    this.suggestSubscription = merge(
-      this.buildSuggestRequest('https://world.openfoodfacts.org/cgi/suggest.pl', params),
-      this.buildSuggestRequest('https://de.openfoodfacts.org/cgi/suggest.pl', params),
-    ).pipe(
-      scan((acc: string[], results: string[]) => {
-        const cleaned = results
-          .map(r => r.replace(/^[a-z]{2}:/i, '').trim())
-          .filter(r => r.toLowerCase().includes(lower));
-        return [...new Set([...acc, ...cleaned])].slice(0, 5);
-      }, [] as string[]),
+    this.suggestSubscription = this.buildSuggestRequest('https://world.openfoodfacts.org/cgi/suggest.pl', params).pipe(
       finalize(() => { if (!gotResults) fallback(); }),
     ).subscribe({
-      next: (merged) => {
-        if (merged.length > 0) {
+      next: (results: string[]) => {
+        const cleaned = results
+          .map(r => r.replace(/^[a-z]{2}:/i, '').trim())
+          .filter(r => r.toLowerCase().includes(lower))
+          .slice(0, 5);
+        if (cleaned.length > 0) {
           gotResults = true;
-          this.suggestions.set(merged);
+          this.suggestions.set(cleaned);
           this.suggestionsOpen.set(true);
           this.cdr.markForCheck();
         }
@@ -234,6 +225,11 @@ export class GenerateRecipeComponent implements OnDestroy {
 
   closeSuggestions(): void {
     this.suggestionsOpen.set(false);
+  }
+
+  /** Closes suggestions after a short delay, allowing suggestion clicks to register first. */
+  closeSuggestionsDelayed(): void {
+    setTimeout(() => this.suggestionsOpen.set(false), 150);
   }
 
   onServingAmountInput(event: Event): void {

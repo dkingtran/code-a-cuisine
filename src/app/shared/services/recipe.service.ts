@@ -75,7 +75,8 @@ export class RecipeService {
     this.logger.log('Generating recipe with preferences');
     const raw = localStorage.getItem(INGREDIENTS_KEY);
     const ingredients: StoredIngredient[] = raw ? JSON.parse(raw) : [];
-    const body = { ...preferences, ingredients };
+    const ingredientsList = formatIngredients(ingredients);
+    const body = { ...preferences, ingredients: ingredientsList };
     return this.http.post(environment.n8nWebhookUrl, body, { responseType: 'text' }).pipe(
       map(response => parseRecipeResponse(response)),
       tap(recipes => {
@@ -92,6 +93,14 @@ export class RecipeService {
       })
     );
   }
+}
+
+/** Formats stored ingredients into a human-readable string for the AI prompt. */
+function formatIngredients(ingredients: StoredIngredient[]): string {
+  return ingredients.map(i => {
+    const unit = i.unit === 'gram' ? 'g' : i.unit === 'piece' ? 'pc' : 'ml';
+    return `${i.amount}${unit} ${i.name}`;
+  }).join(', ');
 }
 
 /** Strips markdown code fences from a raw string. */

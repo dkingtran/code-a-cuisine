@@ -14,13 +14,14 @@
                             placeholder="Pasta"
                             [value]="ingredientName()"
                             (input)="onIngredientNameInput($event)"
+                            (blur)="closeSuggestionsDelayed()"
                         >
                         @if (suggestionsOpen()) {
-                            <div class="suggestions-backdrop" (click)="closeSuggestions()"></div>
                             <ul class="suggestions-list" role="listbox" aria-label="Ingredient suggestions">
                                 @for (suggestion of suggestions(); track suggestion) {
                                     <li
                                         role="option"
+                                        (mousedown)="$event.preventDefault()"
                                         (click)="selectSuggestion(suggestion)"
                                     >{{ suggestion }}</li>
                                 }
