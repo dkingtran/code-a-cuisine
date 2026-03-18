@@ -167,6 +167,6 @@ export class PreferencesComponent implements OnInit {
   /** Closes the modal and navigates back to the ingredient input page. */
   goBackToIngredients(): void {
     this.closeModal();
-    void this.router.navigate(['/generate-recipe']);
+    void this.router.navigate(['/generate']);
   }
 }
