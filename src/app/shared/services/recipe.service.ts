@@ -6,14 +6,12 @@ import { LoggerService } from '../../core/services/logger.service';
 import { FirebaseService } from './firebase.service';
 import { environment } from '../../../environments/environment';
 
-interface StoredIngredient {
+export interface StoredIngredient {
   id: number;
   name: string;
   amount: string;
   unit: 'gram' | 'ml' | 'piece';
 }
-
-const INGREDIENTS_KEY = 'cac_ingredients';
 
 /**
  * Service responsible for fetching and generating recipes.
@@ -26,6 +24,9 @@ export class RecipeService {
   private http = inject(HttpClient);
   private logger = inject(LoggerService);
   private firebase = inject(FirebaseService);
+
+  /** Signal holding the ingredients entered by the user on the generate page. */
+  readonly ingredients = signal<StoredIngredient[]>([]);
 
   /** Signal holding the most recently generated recipes. */
   readonly generatedRecipes = signal<Recipe[]>([]);
@@ -73,9 +74,7 @@ export class RecipeService {
     diet: string | null;
   }): Observable<Recipe[]> {
     this.logger.log('Generating recipe with preferences');
-    const raw = localStorage.getItem(INGREDIENTS_KEY);
-    const ingredients: StoredIngredient[] = raw ? JSON.parse(raw) : [];
-    const ingredientsList = formatIngredients(ingredients);
+    const ingredientsList = formatIngredients(this.ingredients());
     const body = { ...preferences, ingredients: ingredientsList };
     return this.http.post(environment.n8nWebhookUrl, body, { responseType: 'text' }).pipe(
       map(response => parseRecipeResponse(response)),
@@ -86,7 +85,7 @@ export class RecipeService {
         const prefTags = [preferences.cookingTime, preferences.cuisine, preferences.diet]
           .filter((v): v is string => !!v);
         this.generatedPreferenceTags.set(prefTags);
-        localStorage.removeItem(INGREDIENTS_KEY);
+        this.ingredients.set([]);
         this.firebase.saveRecipes(recipes).catch(err =>
           this.logger.log(`Failed to save recipes to Firestore: ${err}`)
         );

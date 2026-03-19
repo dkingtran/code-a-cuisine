@@ -1,16 +1,12 @@
-import { Component, signal, computed, effect, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Subscription, EMPTY } from 'rxjs';
 import { timeout, catchError, finalize } from 'rxjs/operators';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
+import { RecipeService, StoredIngredient } from '../../shared/services/recipe.service';
 
-interface Ingredient {
-  id: number;
-  name: string;
-  amount: string;
-  unit: 'gram' | 'ml' | 'piece';
-}
+interface Ingredient extends StoredIngredient {}
 
 @Component({
   selector: 'app-generate-recipe',
@@ -23,9 +19,9 @@ export class GenerateRecipeComponent implements OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
+  private readonly recipeService = inject(RecipeService);
   private nextId = 0;
 
-  private readonly STORAGE_KEY = 'cac_ingredients';
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private suggestSubscription: Subscription | null = null;
 
@@ -50,28 +46,11 @@ export class GenerateRecipeComponent implements OnDestroy {
   servingAmount = signal('');
   selectedUnit = signal<'gram' | 'ml' | 'piece'>('gram');
   dropdownOpen = signal(false);
-  ingredients = signal<Ingredient[]>(this.loadFromStorage());
+  readonly ingredients = this.recipeService.ingredients;
   suggestions = signal<string[]>([]);
   suggestionsOpen = signal(false);
   editingIngredient = signal<number | null>(null);
   editingDropdownOpen = signal<number | null>(null);
-
-  constructor() {
-    effect(() => {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.ingredients()));
-    });
-  }
-
-  private loadFromStorage(): Ingredient[] {
-    try {
-      const raw = localStorage.getItem(this.STORAGE_KEY);
-      const list: Ingredient[] = raw ? JSON.parse(raw) : [];
-      this.nextId = list.length > 0 ? Math.max(...list.map(i => i.id)) + 1 : 0;
-      return list;
-    } catch {
-      return [];
-    }
-  }
 
   readonly containerPaddingBottom = computed(() => {
     const base = 'clamp(16px, 2.5vw, 25px)';
