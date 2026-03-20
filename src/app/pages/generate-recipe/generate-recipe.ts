@@ -6,7 +6,7 @@ import { timeout, catchError, finalize } from 'rxjs/operators';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 import { RecipeService, StoredIngredient } from '../../shared/services/recipe.service';
 
-interface Ingredient extends StoredIngredient {}
+interface Ingredient extends StoredIngredient { }
 
 @Component({
   selector: 'app-generate-recipe',

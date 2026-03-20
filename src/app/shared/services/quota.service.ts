@@ -27,8 +27,10 @@ export class QuotaService {
     async loadTodayCount(): Promise<void> {
         this.isLoading.set(true);
         try {
-            const count = await this.firebase.getTodayRecipeCount();
-            this.globalUsed.set(count);
+            // TESTING: bypass daily limit — remove before production
+            this.globalUsed.set(0);
+            // const count = await this.firebase.getTodayRecipeCount();
+            // this.globalUsed.set(count);
         } finally {
             this.isLoading.set(false);
         }
