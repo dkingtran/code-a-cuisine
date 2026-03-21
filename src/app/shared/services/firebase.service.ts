@@ -9,6 +9,7 @@ import {
     getDoc,
     doc,
     updateDoc,
+    deleteField,
     onSnapshot,
     increment,
     query,
@@ -39,18 +40,19 @@ export class FirebaseService {
      * Saves an array of generated recipes to the Firestore "recipes" collection.
      * Skips recipes whose title already exists to prevent duplicates.
      */
-    async saveRecipes(recipes: Recipe[]): Promise<void> {
+    async saveRecipes(recipes: Recipe[]): Promise<Recipe[]> {
         const col = collection(this.db, 'recipes');
-        const saves = recipes.map(recipe => this.saveIfNotDuplicate(col, recipe));
-        await Promise.all(saves);
+        return Promise.all(recipes.map(recipe => this.saveIfNotDuplicate(col, recipe)));
     }
 
-    private async saveIfNotDuplicate(col: ReturnType<typeof collection>, recipe: Recipe): Promise<void> {
+    private async saveIfNotDuplicate(col: ReturnType<typeof collection>, recipe: Recipe): Promise<Recipe> {
         const q = query(col, where('title', '==', recipe.title));
         const existing = await getDocs(q);
-        if (existing.empty) {
-            await addDoc(col, { ...recipe, createdAt: Timestamp.now() });
+        if (!existing.empty) {
+            return { ...recipe, id: existing.docs[0].id };
         }
+        const docRef = await addDoc(col, { ...recipe, createdAt: Timestamp.now() });
+        return { ...recipe, id: docRef.id };
     }
 
     /**
@@ -67,12 +69,49 @@ export class FirebaseService {
     }
 
     /**
-     * Atomically increments (or decrements) the likes counter for a recipe.
-     * Uses Firestore increment to prevent race conditions with concurrent likes.
+     * Returns the anonymous user ID stored in localStorage,
+     * creating and persisting a new UUID if none exists yet.
      */
-    async incrementLike(recipeId: string, delta: 1 | -1): Promise<void> {
-        const ref = doc(this.db, 'recipes', recipeId);
-        await updateDoc(ref, { likes: increment(delta) });
+    private getUserId(): string {
+        const key = 'cac_user_id';
+        let id = localStorage.getItem(key);
+        if (!id) {
+            id = crypto.randomUUID();
+            localStorage.setItem(key, id);
+        }
+        return id;
+    }
+
+    /**
+     * Toggles the like state for a recipe for the current anonymous user.
+     * Stores the vote as a field in the recipe document itself (`voters.{userId}`)
+     * to avoid needing a separate Firestore collection with its own security rules.
+     * Returns the new liked state (true = liked, false = unliked).
+     */
+    async toggleLike(recipeId: string): Promise<boolean> {
+        const userId = this.getUserId();
+        const recipeRef = doc(this.db, 'recipes', recipeId);
+        const snap = await getDoc(recipeRef);
+        const voters = (snap.data()?.['voters'] as Record<string, boolean>) ?? {};
+        const hasVoted = voters[userId] === true;
+        if (hasVoted) {
+            await updateDoc(recipeRef, { [`voters.${userId}`]: deleteField(), likes: increment(-1) });
+            return false;
+        }
+        await updateDoc(recipeRef, { [`voters.${userId}`]: true, likes: increment(1) });
+        return true;
+    }
+
+    /**
+     * Returns true if the current anonymous user has already liked the given recipe.
+     * Reads the `voters` map from the recipe document in Firestore.
+     */
+    async hasLiked(recipeId: string): Promise<boolean> {
+        const userId = this.getUserId();
+        const recipeRef = doc(this.db, 'recipes', recipeId);
+        const snap = await getDoc(recipeRef);
+        const voters = (snap.data()?.['voters'] as Record<string, boolean>) ?? {};
+        return voters[userId] === true;
     }
 
     /**
@@ -104,6 +143,19 @@ export class FirebaseService {
             return { ...recipe, id: docSnap.id } as Recipe;
         });
         return recipes.sort((a, b) => (b.likes ?? 0) - (a.likes ?? 0));
+    }
+
+    /**
+     * Fetches a single recipe by its Firestore document ID.
+     * Returns null if no document with that ID exists.
+     */
+    async getRecipeById(id: string): Promise<Recipe | null> {
+        const ref = doc(this.db, 'recipes', id);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) return null;
+        const data = snap.data() as RecipeDocument;
+        const { createdAt: _, ...recipe } = data;
+        return { ...recipe, id: snap.id } as Recipe;
     }
 
     /**

@@ -55,6 +55,13 @@
             }
         }
 
+        .like-btn {
+            &:hover {
+                cursor: unset;
+                transform: none;
+            }
+        }
+
         .recipe-scroll {
             display: flex;
             flex-direction: row;

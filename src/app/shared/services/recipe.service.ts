@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, from, map, switchMap } from 'rxjs';
 import { Recipe, Cuisine } from '../models/recipe.model';
 import { LoggerService } from '../../core/services/logger.service';
 import { FirebaseService } from './firebase.service';
@@ -11,6 +11,19 @@ export interface StoredIngredient {
   name: string;
   amount: string;
   unit: 'gram' | 'ml' | 'piece';
+}
+
+const SESSION_RECIPES_KEY = 'cac_session_recipes';
+const SESSION_PREF_TAGS_KEY = 'cac_session_pref_tags';
+
+/** Reads a typed value from sessionStorage, returns null on any error. */
+function readSession<T>(key: string): T | null {
+  try {
+    const raw = sessionStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -28,14 +41,14 @@ export class RecipeService {
   /** Signal holding the ingredients entered by the user on the generate page. */
   readonly ingredients = signal<StoredIngredient[]>([]);
 
-  /** Signal holding the most recently generated recipes. */
-  readonly generatedRecipes = signal<Recipe[]>([]);
+  /** Signal holding the most recently generated recipes. Restored from sessionStorage on reload. */
+  readonly generatedRecipes = signal<Recipe[]>(readSession<Recipe[]>(SESSION_RECIPES_KEY) ?? []);
 
   /** Signal holding the unique tags from the most recently generated recipes. */
   readonly generatedTags = signal<string[]>([]);
 
-  /** Signal holding the user's selected preference tags (cookingTime, cuisine, diet). */
-  readonly generatedPreferenceTags = signal<string[]>([]);
+  /** Signal holding the user's selected preference tags. Restored from sessionStorage on reload. */
+  readonly generatedPreferenceTags = signal<string[]>(readSession<string[]>(SESSION_PREF_TAGS_KEY) ?? []);
 
   /** Fetches all recipes from the API. */
   getRecipes(): Observable<Recipe[]> {
@@ -78,17 +91,24 @@ export class RecipeService {
     const body = { ...preferences, ingredients: ingredientsList };
     return this.http.post(environment.n8nWebhookUrl, body, { responseType: 'text' }).pipe(
       map(response => parseRecipeResponse(response)),
-      tap(recipes => {
-        this.generatedRecipes.set(recipes);
+      switchMap(recipes => {
         const tags = [...new Set(recipes.flatMap(r => r.tags ?? []))];
         this.generatedTags.set(tags);
         const prefTags = [preferences.cookingTime, preferences.cuisine, preferences.diet]
           .filter((v): v is string => !!v);
         this.generatedPreferenceTags.set(prefTags);
+        sessionStorage.setItem(SESSION_PREF_TAGS_KEY, JSON.stringify(prefTags));
         this.ingredients.set([]);
-        this.firebase.saveRecipes(recipes).catch(err =>
-          this.logger.log(`Failed to save recipes to Firestore: ${err}`)
-        );
+        const save$ = this.firebase.saveRecipes(recipes).catch(err => {
+          this.logger.log(`Failed to save recipes to Firestore: ${err}`);
+          return recipes;
+        });
+        return from(save$);
+      }),
+      map(savedRecipes => {
+        this.generatedRecipes.set(savedRecipes);
+        sessionStorage.setItem(SESSION_RECIPES_KEY, JSON.stringify(savedRecipes));
+        return savedRecipes;
       })
     );
   }

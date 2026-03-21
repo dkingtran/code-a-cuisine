@@ -17,9 +17,6 @@ export class CookbookComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly firebaseService = inject(FirebaseService);
 
-  liked = signal(false);
-  toggleLike(): void { this.liked.update(v => !v); }
-
   readonly allRecipesCollapsed = signal(false);
   toggleAllRecipes(): void { this.allRecipesCollapsed.update(v => !v); }
 

@@ -22,8 +22,23 @@ export const ALL_CHEFS: ChefId[] = ['chef-1', 'chef-2', 'chef-3', 'chef-4'];
 @Injectable({ providedIn: 'root' })
 export class PreferencesService {
     readonly persons = signal(1);
+    /** Persons count frozen at the moment of the last recipe generation. Used by recipe-view after reset(). */
+    readonly generationPersons = signal(1);
+    readonly portions = signal(2);
+    readonly selectedCookingTime = signal<'Quick' | 'Medium' | 'Complex' | null>(null);
+    readonly selectedCuisine = signal<'German' | 'Italian' | 'Indian' | 'Japanese' | 'Gourmet' | 'Fusion' | null>(null);
+    readonly selectedDiet = signal<'Vegetarian' | 'Vegan' | 'Keto' | 'No Preferences' | null>(null);
 
     setPersons(count: number): void {
         this.persons.set(count);
+        this.generationPersons.set(count);
+    }
+
+    reset(): void {
+        this.persons.set(1);
+        this.portions.set(2);
+        this.selectedCookingTime.set(null);
+        this.selectedCuisine.set(null);
+        this.selectedDiet.set(null);
     }
 }

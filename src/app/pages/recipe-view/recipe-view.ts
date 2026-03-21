@@ -24,7 +24,7 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
   readonly chefConfig = CHEF_CONFIG;
   readonly allChefs = ALL_CHEFS;
 
-  private readonly LIKED_KEY = 'cac_liked_recipes';
+  private isLiking = false;
   private unsubscribeLikes: (() => void) | null = null;
 
   recipe = signal<Recipe | null>(null);
@@ -33,40 +33,30 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
   directionsCollapsed = signal(false);
   liked = signal(false);
 
-  /**
-   * Toggles the like state for the current recipe.
-   * Performs an optimistic UI update and persists the change to Firestore.
-   * Reverts on failure.
-   */
-  toggleLike(): void {
-    const r = this.recipe();
-    if (!r?.id) return;
-    const newLiked = !this.liked();
-    this.liked.set(newLiked);
-    const delta = newLiked ? 1 : -1;
-    // Optimistic update
-    this.likes.update(v => v + delta);
-    // Persist liked state in localStorage
-    const stored = this.getLikedSet();
-    newLiked ? stored.add(r.id) : stored.delete(r.id);
-    localStorage.setItem(this.LIKED_KEY, JSON.stringify([...stored]));
-    // Write to Firestore
-    this.firebaseService.incrementLike(r.id, delta).catch(() => {
-      // Revert optimistic update on failure
-      this.liked.set(!newLiked);
-      this.likes.update(v => v - delta);
-      this.cdr.markForCheck();
-    });
+  /** Reverts an optimistic like toggle on error. */
+  private revertLike(newLiked: boolean, delta: number): void {
+    this.liked.set(!newLiked);
+    this.likes.update(v => v - delta);
+    this.cdr.markForCheck();
   }
 
-  /** Returns the set of recipe IDs the user has liked, read from localStorage. */
-  private getLikedSet(): Set<string> {
-    try {
-      const raw = localStorage.getItem(this.LIKED_KEY);
-      return new Set(raw ? JSON.parse(raw) : []);
-    } catch {
-      return new Set();
-    }
+  /**
+   * Toggles the like state for the current recipe.
+   * Performs an optimistic UI update, persists the change to Firestore
+   * via an anonymous voter UUID, and reverts on failure.
+   */
+  toggleLike(): void {
+    if (this.isLiking) return;
+    const r = this.recipe();
+    if (!r?.id) return;
+    this.isLiking = true;
+    const newLiked = !this.liked();
+    const delta = newLiked ? 1 : -1;
+    this.liked.set(newLiked);
+    this.likes.update(v => v + delta);
+    this.firebaseService.toggleLike(r.id)
+      .catch(() => this.revertLike(newLiked, delta))
+      .finally(() => { this.isLiking = false; });
   }
 
   private readonly onResize = () => {
@@ -86,7 +76,7 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
   /** Groups directions into rows of `persons` columns for the grid layout. */
   readonly directionPairs = computed(() => {
     const dirs = this.recipe()?.directions ?? [];
-    const n = this.preferencesService.persons();
+    const n = this.preferencesService.generationPersons();
     if (n < 2 || dirs.length === 0) return null;
     const pairs: RecipeDirection[][] = [];
     for (let i = 0; i < dirs.length; i += n) {
@@ -112,40 +102,32 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Loads a mock recipe for direct URL access (fallback until real API is available).
-   * TODO: Replace with recipeService.getRecipeById(id) once n8n delivers persisted recipes.
+   * Loads a recipe from Firestore by ID when navigated to directly via URL.
+   * Redirects to the cookbook if the recipe is not found.
    */
   private loadMockRecipe(id: string): void {
-    this.recipe.set({
-      id,
-      number: 1,
-      title: 'Sample Recipe',
-      description: 'Description',
-      ingredients: ['80g Pasta noodles', '100g Baby spinach', '2 Garlic cloves'],
-      extraIngredients: ['40g Parmesan cheese', '30ml Olive oil', '1 tsp Salt'],
-      directions: [
-        { title: 'Cook the Pasta', text: 'Cook your noodles in boiling, salted water until the pasta is al dente. Drain the pasta and reserve some of the pasta water.' },
-        { title: 'Prepare the Sauce', text: 'While the pasta is cooking, heat olive oil in a pan over medium heat. Add the garlic and sauté until golden. Add tomatoes, oregano, salt, and pepper, and cook for 3–4 minutes.' },
-        { title: 'Add the Spinach', text: 'Add the baby spinach to the pan and stir until wilted, about 1–2 minutes. Season to taste.' },
-        { title: 'Combine & Serve', text: 'Toss the cooked pasta with the sauce. Add a splash of pasta water if needed. Plate and finish with freshly grated parmesan.' },
-      ],
-      cuisine: 'italian',
-      time: 20,
-      tags: ['Vegetarian', 'Quick'],
-      likes: 42,
-      nutrition: { calories: 630, protein: 28, fat: 18, carbs: 74 },
-    });
-    this.initLikes(this.recipe()!);
+    this.firebaseService.getRecipeById(id).then(recipe => {
+      if (recipe) {
+        this.recipe.set(recipe);
+        this.initLikes(recipe);
+      } else {
+        void this.router.navigate(['/cookbook']);
+      }
+      this.cdr.markForCheck();
+    }).catch(() => void this.router.navigate(['/cookbook']));
   }
 
   /**
    * Initialises the likes signal from the recipe data and attaches
    * a real-time Firestore listener so the count updates across devices.
+   * Restores the liked state from the Firestore votes collection.
    */
   private initLikes(recipe: Recipe): void {
     this.likes.set(recipe.likes ?? 0);
-    this.liked.set(this.getLikedSet().has(recipe.id));
-    // Real-time listener – updates whenever anyone likes from any device
+    this.firebaseService.hasLiked(recipe.id).then(liked => {
+      this.liked.set(liked);
+      this.cdr.markForCheck();
+    });
     this.unsubscribeLikes = this.firebaseService.listenToLikes(recipe.id, count => {
       this.likes.set(count);
       this.cdr.markForCheck();

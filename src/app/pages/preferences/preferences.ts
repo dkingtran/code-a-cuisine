@@ -32,14 +32,14 @@ export class PreferencesComponent implements OnInit {
   readonly GLOBAL_LIMIT = this.quotaService.GLOBAL_LIMIT;
   readonly IP_LIMIT = this.quotaService.IP_LIMIT;
 
-  readonly portions = signal(2);
+  readonly portions = this.preferencesService.portions;
   readonly portionsShake = signal(false);
-  readonly persons = signal(1);
+  readonly persons = this.preferencesService.persons;
   readonly personsShake = signal(false);
 
-  readonly selectedCookingTime = signal<'Quick' | 'Medium' | 'Complex' | null>(null);
-  readonly selectedCuisine = signal<'German' | 'Italian' | 'Indian' | 'Japanese' | 'Gourmet' | 'Fusion' | null>(null);
-  readonly selectedDiet = signal<'Vegetarian' | 'Vegan' | 'Keto' | 'No Preferences' | null>(null);
+  readonly selectedCookingTime = this.preferencesService.selectedCookingTime;
+  readonly selectedCuisine = this.preferencesService.selectedCuisine;
+  readonly selectedDiet = this.preferencesService.selectedDiet;
 
   readonly canGenerate = computed(() =>
     this.selectedCookingTime() !== null &&
@@ -64,29 +64,35 @@ export class PreferencesComponent implements OnInit {
     this.portions.update(p => p + 1);
   }
 
+  /** Decrements the persons counter, triggering a shake animation at the minimum. */
   decreasePersons() {
     if (this.persons() <= 1) { this.triggerPersonsShake(); return; }
     this.persons.update(p => p - 1);
   }
 
+  /** Increments the persons counter, triggering a shake animation at the maximum. */
   increasePersons() {
     if (this.persons() >= 4) { this.triggerPersonsShake(); return; }
     this.persons.update(p => p + 1);
   }
 
+  /** Briefly sets the persons shake signal to animate the counter at its limit. */
   private triggerPersonsShake(): void {
     this.personsShake.set(true);
     setTimeout(() => this.personsShake.set(false), 400);
   }
 
+  /** Selects or deselects the cooking time category (toggles if already selected). */
   selectCookingTime(time: 'Quick' | 'Medium' | 'Complex') {
     this.selectedCookingTime.update(v => v === time ? null : time);
   }
 
+  /** Selects or deselects the cuisine style (toggles if already selected). */
   selectCuisine(cuisine: 'German' | 'Italian' | 'Indian' | 'Japanese' | 'Gourmet' | 'Fusion') {
     this.selectedCuisine.update(v => v === cuisine ? null : cuisine);
   }
 
+  /** Selects or deselects the diet preference (toggles if already selected). */
   selectDiet(diet: 'Vegetarian' | 'Vegan' | 'Keto' | 'No Preferences') {
     this.selectedDiet.update(v => v === diet ? null : diet);
   }
@@ -137,6 +143,7 @@ export class PreferencesComponent implements OnInit {
   private handleGenerateSuccess(): void {
     this.quotaService.incrementUsed();
     this.loadingService.hide();
+    this.preferencesService.reset();
     void this.router.navigate(['/results']);
   }
 

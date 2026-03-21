@@ -20,6 +20,7 @@ export type SvgIconName =
   | 'chef-3'
   | 'chef-4'
   | 'heart'
+  | 'heart-filled'
   | 'banner-ingredients'
   | 'banner-directions'
   | 'banner-ingredients-mobile'
@@ -145,6 +146,12 @@ export type SvgIconName =
       </svg>
     }
 
+    @if (isHeartFilled()) {
+      <svg [style.width]="wCss()" [style.height]="hCss()" viewBox="0 0 17 15" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M8.33333 14.7292C8.13889 14.7292 7.94097 14.6944 7.73958 14.625C7.53819 14.5556 7.36111 14.4444 7.20833 14.2917L5.77083 12.9792C4.29861 11.6319 2.96875 10.2951 1.78125 8.96875C0.59375 7.64236 0 6.18056 0 4.58333C0 3.27778 0.4375 2.1875 1.3125 1.3125C2.1875 0.4375 3.27778 0 4.58333 0C5.31944 0 6.01389 0.15625 6.66667 0.46875C7.31944 0.78125 7.875 1.20833 8.33333 1.75C8.79167 1.20833 9.34722 0.78125 10 0.46875C10.6528 0.15625 11.3472 0 12.0833 0C13.3889 0 14.4792 0.4375 15.3542 1.3125C16.2292 2.1875 16.6667 3.27778 16.6667 4.58333C16.6667 6.18056 16.0764 7.64583 14.8958 8.97917C13.7153 10.3125 12.375 11.6528 10.875 13L9.45833 14.2917C9.30556 14.4444 9.12847 14.5556 8.92708 14.625C8.72569 14.6944 8.52778 14.7292 8.33333 14.7292Z" fill="#10310B"/>
+      </svg>
+    }
+
     @if (isBannerIngredients()) {
       <img ngSrc="/assets/img/recipe-view/ingredients.png" style="width: 100%; height: auto; display: block;" width="1152" height="148" alt="" aria-hidden="true" priority/>
     }
@@ -220,6 +227,7 @@ export class SvgIconComponent {
   readonly isChef3 = computed(() => this.name() === 'chef-3');
   readonly isChef4 = computed(() => this.name() === 'chef-4');
   readonly isHeart = computed(() => this.name() === 'heart');
+  readonly isHeartFilled = computed(() => this.name() === 'heart-filled');
   readonly isBannerIngredients = computed(() => this.name() === 'banner-ingredients');
   readonly isBannerDirections = computed(() => this.name() === 'banner-directions');
   readonly isBannerIngredientsMobile = computed(() => this.name() === 'banner-ingredients-mobile');

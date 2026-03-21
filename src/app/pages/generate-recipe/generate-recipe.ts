@@ -78,6 +78,7 @@ export class GenerateRecipeComponent implements OnDestroy {
     this.dropdownOpen.set(false);
   }
 
+  /** Closes the unit selection dropdown without changing the selected unit. */
   closeDropdown(): void {
     this.dropdownOpen.set(false);
   }
@@ -112,17 +113,17 @@ export class GenerateRecipeComponent implements OnDestroy {
     this.ingredients.set([]);
   }
 
+  /** Enters edit mode for the given ingredient, or saves and exits if already editing. */
   editIngredient(ingredient: Ingredient): void {
     if (this.editingIngredient() === ingredient.id) {
-      // Save changes
       this.saveEditedIngredient();
     } else {
       this.editingIngredient.set(ingredient.id);
     }
   }
 
+  /** Exits inline edit mode — changes are already live via signal updates. */
   private saveEditedIngredient(): void {
-    // Changes are already saved live, just exit edit mode
     this.editingIngredient.set(null);
     this.editingDropdownOpen.set(null);
   }
@@ -203,10 +204,12 @@ export class GenerateRecipeComponent implements OnDestroy {
     this.suggestionsOpen.set(false);
   }
 
+  /** Hides the autocomplete suggestions dropdown. */
   closeSuggestions(): void {
     this.suggestionsOpen.set(false);
   }
 
+  /** Restricts serving-amount input to digits only (max 4 characters). */
   onServingAmountInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     const filtered = input.value.replace(/[^0-9]/g, '').slice(0, 4);
@@ -214,6 +217,7 @@ export class GenerateRecipeComponent implements OnDestroy {
     this.servingAmount.set(filtered);
   }
 
+  /** Restricts the inline amount field to digits only and updates the ingredient signal. */
   onEditingAmountInput(event: Event, item: Ingredient): void {
     const input = event.target as HTMLInputElement;
     const filtered = input.value.replace(/[^0-9]/g, '').slice(0, 4);
@@ -223,14 +227,17 @@ export class GenerateRecipeComponent implements OnDestroy {
     );
   }
 
+  /** Toggles the inline unit dropdown for the given ingredient row. */
   toggleEditingDropdown(item: Ingredient): void {
     this.editingDropdownOpen.set(this.editingDropdownOpen() === item.id ? null : item.id);
   }
 
+  /** Closes the inline unit dropdown without changing the selected unit. */
   closeEditingDropdown(): void {
     this.editingDropdownOpen.set(null);
   }
 
+  /** Updates the unit for an ingredient row and closes its dropdown. */
   selectEditingUnit(item: Ingredient, unit: 'gram' | 'ml' | 'piece'): void {
     this.ingredients.update(list =>
       list.map(i => i.id === item.id ? { ...i, unit } : i)
@@ -238,6 +245,7 @@ export class GenerateRecipeComponent implements OnDestroy {
     this.editingDropdownOpen.set(null);
   }
 
+  /** Cancels any running suggestion subscription and clears the debounce timer on destroy. */
   ngOnDestroy(): void {
     this.suggestSubscription?.unsubscribe();
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
