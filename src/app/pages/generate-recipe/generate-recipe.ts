@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Subscription, EMPTY } from 'rxjs';
@@ -15,7 +15,7 @@ interface Ingredient extends StoredIngredient { }
   styleUrl: './generate-recipe.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GenerateRecipeComponent implements OnDestroy {
+export class GenerateRecipeComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
@@ -24,6 +24,8 @@ export class GenerateRecipeComponent implements OnDestroy {
 
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private suggestSubscription: Subscription | null = null;
+  private readonly isMobile = signal(window.innerWidth <= 500);
+  private readonly onResize = () => this.isMobile.set(window.innerWidth <= 500);
 
   private readonly FALLBACK_INGREDIENTS = [
     'Butter', 'Salt', 'Pepper', 'Sugar', 'Flour', 'Egg', 'Milk', 'Cream',
@@ -55,7 +57,7 @@ export class GenerateRecipeComponent implements OnDestroy {
   readonly containerPaddingBottom = computed(() => {
     const base = 'clamp(16px, 2.5vw, 25px)';
     const dropdownExtra = this.dropdownOpen() ? 108 : 0;
-    const suggestionsExtra = this.suggestionsOpen() ? this.suggestions().length * 36 : 0;
+    const suggestionsExtra = !this.isMobile() && this.suggestionsOpen() ? this.suggestions().length * 36 : 0;
     const extra = Math.max(dropdownExtra, suggestionsExtra);
     return extra > 0 ? `calc(${base} + ${extra}px)` : null;
   });
@@ -245,10 +247,15 @@ export class GenerateRecipeComponent implements OnDestroy {
     this.editingDropdownOpen.set(null);
   }
 
+  ngOnInit(): void {
+    window.addEventListener('resize', this.onResize);
+  }
+
   /** Cancels any running suggestion subscription and clears the debounce timer on destroy. */
   ngOnDestroy(): void {
     this.suggestSubscription?.unsubscribe();
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    window.removeEventListener('resize', this.onResize);
   }
 
   /** Navigates to the preferences page to continue recipe generation. */

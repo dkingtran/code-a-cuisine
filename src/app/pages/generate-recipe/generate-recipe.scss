@@ -58,7 +58,8 @@
     }
 }
 
-.ingredient-container {
+.ingredient-container,
+.serving-size-container {
     @include flex-layout(column);
     gap: 8px;
 
@@ -66,14 +67,14 @@
         @include input-creme;
         width: 100%;
     }
+}
 
-    &:first-child {
-        flex: 1;
-    }
+.ingredient-container {
+    flex: 1;
+}
 
-    &:last-child {
-        flex: 0 0 auto;
-    }
+.serving-size-container {
+    flex: 0 0 auto;
 }
 
 // ── Ingredient autocomplete ──────────────────────────────────────────────────
@@ -104,6 +105,12 @@
     list-style: none;
     min-width: 100%;
     overflow: hidden;
+
+    @media (max-width: 500px) {
+        position: static;
+        margin-top: 6px;
+        width: 100%;
+    }
 
     li {
         padding: 4px 8px;
