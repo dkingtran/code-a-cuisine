@@ -358,7 +358,7 @@
       "main": [
         [
           {
-            "node": "Check Global Quota Test",
+            "node": "Check Global Quota",
             "type": "main",
             "index": 0
           }
