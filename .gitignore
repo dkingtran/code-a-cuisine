@@ -51,6 +51,4 @@ src/environments/environment.ts
 src/environments/environment.prod.ts
 
 # n8n workflow files with embedded credentials
-Code A Cuisine (12).json
-Code A Cuisine (13).json
-Code A Cuisine (15).json
+Code A Cuisine*.json
