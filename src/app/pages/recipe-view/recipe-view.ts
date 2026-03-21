@@ -73,16 +73,19 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
   /** Navigates back to the ingredient input page. */
   goToGenerate(): void { void this.router.navigate(['/generate']); }
 
-  /** Groups directions into rows of `persons` columns for the grid layout. */
-  readonly directionPairs = computed(() => {
+  /** Groups directions into rows of `persons` entries, one card per chef. */
+  readonly directionRows = computed(() => {
     const dirs = this.recipe()?.directions ?? [];
     const n = this.preferencesService.generationPersons();
     if (n < 2 || dirs.length === 0) return null;
-    const pairs: RecipeDirection[][] = [];
+    const rows: { pair: RecipeDirection[]; stepStart: number }[] = [];
+    let step = 1;
     for (let i = 0; i < dirs.length; i += n) {
-      pairs.push(dirs.slice(i, i + n));
+      const pair = dirs.slice(i, i + n);
+      rows.push({ pair, stepStart: step });
+      step += pair.length;
     }
-    return pairs;
+    return rows;
   });
 
   /**
@@ -93,12 +96,17 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
     window.addEventListener('resize', this.onResize);
     const state = history.state as { recipe?: Recipe };
     if (state?.recipe) {
-      this.recipe.set(state.recipe);
+      this.applyRecipe(state.recipe);
       this.initLikes(state.recipe);
       return;
     }
     const id = this.route.snapshot.paramMap.get('id');
     if (id) this.loadMockRecipe(id);
+  }
+
+  private applyRecipe(recipe: Recipe): void {
+    this.recipe.set(recipe);
+    if (recipe.persons) this.preferencesService.setGenerationPersons(recipe.persons);
   }
 
   /**
@@ -108,7 +116,7 @@ export class RecipeViewComponent implements OnInit, OnDestroy {
   private loadMockRecipe(id: string): void {
     this.firebaseService.getRecipeById(id).then(recipe => {
       if (recipe) {
-        this.recipe.set(recipe);
+        this.applyRecipe(recipe);
         this.initLikes(recipe);
       } else {
         void this.router.navigate(['/cookbook']);

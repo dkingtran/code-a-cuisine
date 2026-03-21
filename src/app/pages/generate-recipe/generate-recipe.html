@@ -149,6 +149,16 @@
                     <li class="empty-state">No ingredients added yet.</li>
                 }
             </ul>
+            @if (duplicateIngredients().length > 0) {
+              <div class="duplicate-warnings" role="alert">
+                <div class="duplicate-names">
+                  @for (name of duplicateIngredients(); track name) {
+                    <p>"{{ name }}" is already in your list</p>
+                  }
+                </div>
+                <button type="button" class="duplicate-remove-btn unit-toggle" (click)="removeAllDuplicates()"><p>Remove</p></button>
+              </div>
+            }
         </div>
     </div>
     @if (ingredients().length > 0) {

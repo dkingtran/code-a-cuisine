@@ -19,11 +19,15 @@ export const CHEF_CONFIG: Record<ChefId, ChefConfig> = {
 
 export const ALL_CHEFS: ChefId[] = ['chef-1', 'chef-2', 'chef-3', 'chef-4'];
 
+const GEN_PERSONS_KEY = 'cac_gen_persons';
+
 @Injectable({ providedIn: 'root' })
 export class PreferencesService {
     readonly persons = signal(1);
-    /** Persons count frozen at the moment of the last recipe generation. Used by recipe-view after reset(). */
-    readonly generationPersons = signal(1);
+    /** Persons count frozen at the moment of the last recipe generation. Persisted in sessionStorage. */
+    readonly generationPersons = signal(
+        (() => { try { return Number(sessionStorage.getItem(GEN_PERSONS_KEY)) || 1; } catch { return 1; } })()
+    );
     readonly portions = signal(2);
     readonly selectedCookingTime = signal<'Quick' | 'Medium' | 'Complex' | null>(null);
     readonly selectedCuisine = signal<'German' | 'Italian' | 'Indian' | 'Japanese' | 'Gourmet' | 'Fusion' | null>(null);
@@ -31,7 +35,12 @@ export class PreferencesService {
 
     setPersons(count: number): void {
         this.persons.set(count);
+        this.setGenerationPersons(count);
+    }
+
+    setGenerationPersons(count: number): void {
         this.generationPersons.set(count);
+        try { sessionStorage.setItem(GEN_PERSONS_KEY, String(count)); } catch { }
     }
 
     reset(): void {

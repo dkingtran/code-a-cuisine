@@ -1,0 +1,465 @@
+{
+  "name": "Code A Cuisine",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "935a2f3b-3b9f-4533-bd45-d2f976dcd56e",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        768
+      ],
+      "id": "d6d1b98f-b54c-4816-ac1a-247e1ddf7848",
+      "name": "Webhook",
+      "webhookId": "935a2f3b-3b9f-4533-bd45-d2f976dcd56e"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─── SERVER-SIDE GLOBAL QUOTA CHECK ───────────────────────────────────────\n// Requires n8n 0.218+  ($http helper available in Code nodes)\n//\n// HOW TO CONFIGURE:\n//   1. Set PROJECT_ID  → Firebase console → Project settings → Project ID\n//   2. Set API_KEY     → Firebase console → Project settings → Web API Key\n//   3. Make sure your Firestore rules allow reads for the 'recipes' collection\n//      without authentication (the Web API Key does NOT bypass security rules).\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst GLOBAL_LIMIT = 12;\nconst PROJECT_ID   = 'code-a-cuisine-79e07';\nconst API_KEY      = 'AIzaSyCNmlc1ZqgKqYotciRfpwMUzqSB-T3pnSo';\n\n// Extract client IP\nconst ip = $input.item.json.headers?.['x-forwarded-for']?.split(',')[0]?.trim()\n         || $input.item.json.headers?.['x-real-ip']\n         || 'unknown';\n\n// Today midnight UTC as ISO string (e.g. \"2026-03-14T00:00:00.000Z\")\nconst now        = new Date();\nconst todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));\nconst todayISO   = todayStart.toISOString();\n\n// Query Firestore: count recipes created today\nlet globalCount = 0;\ntry {\n  const response = await $http.request({\n    method:  'POST',\n    url:     'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents:runQuery?key=' + API_KEY,\n    headers: { 'Content-Type': 'application/json' },\n    body:    JSON.stringify({\n      structuredQuery: {\n        from:  [{ collectionId: 'recipes' }],\n        where: {\n          fieldFilter: {\n            field: { fieldPath: 'createdAt' },\n            op:    'GREATER_THAN_OR_EQUAL',\n            value: { timestampValue: todayISO }\n          }\n        },\n        limit: GLOBAL_LIMIT + 1\n      }\n    })\n  });\n\n  // Firestore runQuery returns an array; non-empty results have a 'document' field.\n  const results  = Array.isArray(response) ? response : [response];\n  globalCount    = results.filter(r => r && r.document).length;\n} catch (e) {\n  // If the quota check itself fails (network issue, wrong credentials, etc.),\n  // we fail open so users are not blocked due to an infrastructure error.\n  globalCount = 0;\n}\n\nconst quotaStatus = globalCount >= GLOBAL_LIMIT ? 'QUOTA_EXCEEDED:global' : 'ok';\n\nreturn [{\n  json: {\n    ...$input.item.json,\n    ip,\n    todayISO,\n    globalCount,\n    quotaStatus\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        896
+      ],
+      "id": "e8fbb922-d114-4c5c-ae5d-6212a09257c3",
+      "name": "Check Global Quota"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "aa11bb22-cc33-dd44-ee55-ff6677889900",
+              "leftValue": "={{ $json.quotaStatus }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        768
+      ],
+      "id": "d4628908-feab-4f51-8984-7d010b782abd",
+      "name": "Quota OK?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"quotaExceeded\": true, \"type\": \"global\" }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        944
+      ],
+      "id": "276a6591-85be-499b-8f88-e429d5b7a3a7",
+      "name": "Respond - Quota Exceeded"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f217ead1-a4bf-4832-b01d-7cce341d4948",
+              "leftValue": "={{ $json.body.ingredients }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        560,
+        768
+      ],
+      "id": "d2290062-4fff-4397-8624-935794968a45",
+      "name": "Validate Input"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.text.replace(/^```json\\s*\\n?/, '').replace(/\\n?```\\s*$/, '') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1584,
+        656
+      ],
+      "id": "6235472e-ea58-45a2-b0ef-7915e655ee0f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"error\": \"No ingredients provided\", \"code\": \"INVALID_INPUT\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        768,
+        848
+      ],
+      "id": "4584ec88-ce55-4be8-bd3b-6708b86a4629",
+      "name": "Respond - Invalid Input"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        1120
+      ],
+      "id": "39c140b8-0f2d-45e6-9072-4df35268b8ce",
+      "name": "Error Handler"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"error\": \"Internal workflow error\", \"code\": \"WORKFLOW_ERROR\" }",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1472,
+        1120
+      ],
+      "id": "aa972642-ef52-41d8-84cc-71d5dcff5b46",
+      "name": "Respond - Workflow Error"
+    },
+    {
+      "parameters": {
+        "content": "*TEST* \n\nohne Limit",
+        "height": 80,
+        "width": 150,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        80,
+        528
+      ],
+      "typeVersion": 1,
+      "id": "add791dd-9d4c-4b82-b8a8-43cf54b09802",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "*PUBLIC*\n\nmit Limit",
+        "height": 80,
+        "width": 150,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        80,
+        800
+      ],
+      "typeVersion": 1,
+      "id": "e059b524-6763-4395-b6a7-1571624d5d97",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─── SERVER-SIDE GLOBAL QUOTA CHECK ───────────────────────────────────────\n// Requires n8n 0.218+  ($http helper available in Code nodes)\n//\n// HOW TO CONFIGURE:\n//   1. Set PROJECT_ID  → Firebase console → Project settings → Project ID\n//   2. Set API_KEY     → Firebase console → Project settings → Web API Key\n//   3. Make sure your Firestore rules allow reads for the 'recipes' collection\n//      without authentication (the Web API Key does NOT bypass security rules).\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst GLOBAL_LIMIT = 12;\nconst PROJECT_ID   = 'code-a-cuisine-79e07';\nconst API_KEY      = 'AIzaSyCNmlc1ZqgKqYotciRfpwMUzqSB-T3pnSo';\n\n// Extract client IP\nconst ip = $input.item.json.headers?.['x-forwarded-for']?.split(',')[0]?.trim()\n         || $input.item.json.headers?.['x-real-ip']\n         || 'unknown';\n\n// Today midnight UTC as ISO string (e.g. \"2026-03-14T00:00:00.000Z\")\nconst now        = new Date();\nconst todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));\nconst todayISO   = todayStart.toISOString();\n\n// Query Firestore: count recipes created today\nlet globalCount = 0;\ntry {\n  const response = await $http.request({\n    method:  'POST',\n    url:     'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents:runQuery?key=' + API_KEY,\n    headers: { 'Content-Type': 'application/json' },\n    body:    JSON.stringify({\n      structuredQuery: {\n        from:  [{ collectionId: 'recipes' }],\n        where: {\n          fieldFilter: {\n            field: { fieldPath: 'createdAt' },\n            op:    'GREATER_THAN_OR_EQUAL',\n            value: { timestampValue: todayISO }\n          }\n        },\n        limit: GLOBAL_LIMIT + 1\n      }\n    })\n  });\n\n  // Firestore runQuery returns an array; non-empty results have a 'document' field.\n  const results  = Array.isArray(response) ? response : [response];\n  globalCount    = results.filter(r => r && r.document).length;\n} catch (e) {\n  // If the quota check itself fails (network issue, wrong credentials, etc.),\n  // we fail open so users are not blocked due to an infrastructure error.\n  globalCount = 0;\n}\n\nconst quotaStatus = 'ok';\n\nreturn [{\n  json: {\n    ...$input.item.json,\n    ip,\n    todayISO,\n    globalCount,\n    quotaStatus\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        624
+      ],
+      "id": "dae9e0db-6b5e-4a3c-807e-469b9953f693",
+      "name": "Check Global Quota Test"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "717ef2b0-e4bc-4dea-9b3c-86f9482d3db5",
+              "name": "ingredients",
+              "value": "={{ $json.body.ingredients }}",
+              "type": "string"
+            },
+            {
+              "id": "71dd3f14-d197-4754-bc17-a9747598da8d",
+              "name": "portions",
+              "value": "={{ $json.body.portions }}",
+              "type": "string"
+            },
+            {
+              "id": "4b35f5a3-f099-4673-9408-d49a86129d59",
+              "name": "persons",
+              "value": "={{ $json.body.persons }}",
+              "type": "string"
+            },
+            {
+              "id": "98662eb2-2ecc-44fc-af86-02b8135896b4",
+              "name": "cookingTime",
+              "value": "={{ $json.body.cookingTime }}",
+              "type": "string"
+            },
+            {
+              "id": "3aeca99f-2b8a-48f7-a804-8a49da1124ca",
+              "name": "cuisine",
+              "value": "={{ $json.body.cuisine }}",
+              "type": "string"
+            },
+            {
+              "id": "daa67213-b48d-4070-b160-178393cdcafc",
+              "name": "diet",
+              "value": "={{ $json.body.diet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        656
+      ],
+      "id": "5c13475a-7465-4c20-8dd3-439e0a10bf89",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1248,
+        656
+      ],
+      "id": "b400e351-64b7-43f8-9857-79db1630ddf0",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        848
+      ],
+      "id": "07ee6b07-2fd0-446a-9a8f-8bea328635e3",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HIvgqAMYAvCxHkLT",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.item.json;\n\nconst prompt = `You are a recipe-generation API. Output ONLY a raw JSON array. NO markdown. NO code blocks. NO backticks. Start your response with [ and end with ]. No text before or after.\n\nINPUTS (read carefully before generating):\n- Ingredients: ${d.ingredients}\n  The \"ingredients\" field in every recipe MUST contain ONLY items from this list.\n  Copy each ingredient EXACTLY as written — same name, same amount, same unit.\n  DO NOT add any ingredient not in this list — not even common ones like Salt, Oil, Water.\n  Anything not in this list goes into \"extraIngredients\" instead.\n- Portions: ${d.portions}\n- Persons: ${d.persons}\n- Cooking time: ${d.cookingTime}\n- Cuisine: ${d.cuisine}\n- Diet: ${d.diet}\n\nTIME CONSTRAINT — this is absolute:\n- cookingTime=\"Quick\"   → \"time\" must be 5–20\n- cookingTime=\"Medium\"  → \"time\" must be 21–45\n- cookingTime=\"Complex\" → \"time\" must be 46–180\nWRONG: cookingTime=\"Quick\" with time=30, cookingTime=\"Medium\" with time=15, cookingTime=\"Complex\" with time=25\nCORRECT: cookingTime=\"Complex\" → e.g. 90. cookingTime=\"Quick\" → e.g. 15. cookingTime=\"Medium\" → e.g. 35.\n\nGenerate exactly 3 recipes in this JSON structure:\n[\n  {\n    \"id\": \"1\",\n    \"number\": 1,\n    \"title\": \"Recipe Title\",\n    \"description\": \"1-2 sentence description.\",\n    \"cuisine\": \"<lowercase cuisine from input>\",\n    \"time\": 90,\n    \"tags\": [\"Complex\"],\n    \"ingredients\": [\"<ingredient from input>\"],\n    \"extraIngredients\": [\"<anything else needed>\"],\n    \"directions\": [\n      { \"title\": \"Step title\", \"text\": \"Do something for 10 minutes.\" }\n    ],\n    \"nutrition\": { \"calories\": 600, \"protein\": 30, \"fat\": 20, \"carbs\": 60 },\n    \"likes\": 0\n  }\n]\n\nRules:\n1. \"ingredients\": copy ingredient names EXACTLY as they appear in the Ingredients input. Never add new ones.\n2. \"extraIngredients\": anything the recipe needs that is NOT in the Ingredients input.\n3. \"time\": must satisfy the TIME CONSTRAINT above. Re-check before outputting.\n4. \"cuisine\": lowercase, must match the Cuisine input.\n5. \"tags\": must include the cookingTime value. Include the diet tag ONLY if ALL provided ingredients are compatible with that diet. Only use: Quick, Medium, Complex, Vegetarian, Vegan, Keto.\n6. \"id\": \"1\", \"2\", \"3\" as strings. \"number\": 1, 2, 3 as integers.\n7. All text in English.\n8. Each direction step must include a duration.\n9. MULTI-PERSON DIRECTIONS (persons > 1): Divide the recipe into exactly 3–4 rounds. For each round output exactly ${d.persons} consecutive entries — one per person, each with its OWN unique \"title\" describing that person's specific task. Each entry's \"text\" is 2–4 sentences covering everything that person does during that round. NEVER write \"Person X:\", \"Chef X:\", \"Person 1:\" or any person label inside the text. Total entries = rounds × persons. Example (persons=2, 2 rounds): [{\"title\":\"Melt the Cheese\",\"text\":\"Grate the cheese finely, then warm the milk in a saucepan over low heat. Stir in the cheese constantly until fully melted and smooth, about 5 minutes.\"},{\"title\":\"Cook the Pasta\",\"text\":\"Zest and juice the lemon. Bring a large pot of salted water to a boil and cook the pasta until al dente, about 10 minutes.\"},{\"title\":\"Season & Combine\",\"text\":\"Stir the lemon zest into the sauce, then toss in the drained pasta. Season with thyme and black pepper and mix for 2 minutes.\"},{\"title\":\"Drain & Plate\",\"text\":\"Drain the pasta and add a splash of pasta water to the sauce to adjust consistency. Portion into bowls and garnish with lemon slices.\"}].\n10. NEVER skip a provided ingredient. Use ALL ingredients from the input list in every recipe, regardless of diet. If the diet is incompatible with some ingredients, simply omit the diet tag from \"tags\" (per rule 5). The ingredients always take priority.`;\n\nreturn [{ json: { ...d, prompt } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        656
+      ],
+      "id": "f924c90a-5978-48d1-abfd-b0ea0ba93f7c",
+      "name": "Prompt"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Global Quota Test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Global Quota": {
+      "main": [
+        [
+          {
+            "node": "Quota OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quota OK?": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Quota Exceeded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Invalid Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Handler": {
+      "main": [
+        [
+          {
+            "node": "Respond - Workflow Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Global Quota Test": {
+      "main": [
+        [
+          {
+            "node": "Quota OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timeSavedMode": "fixed",
+    "timezone": "Europe/Berlin",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "R1kp14g3VOJSdA2t"
+  },
+  "versionId": "b88d78da-014e-496b-92fb-66fec9ed008d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "01995ce7a7bfc75cfc6a0f2e6edd025af9b9a71880c140b9c72213d4834155d0"
+  },
+  "id": "boo3ArLhCj3fzy6x",
+  "tags": []
+}

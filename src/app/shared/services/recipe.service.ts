@@ -99,7 +99,8 @@ export class RecipeService {
         this.generatedPreferenceTags.set(prefTags);
         sessionStorage.setItem(SESSION_PREF_TAGS_KEY, JSON.stringify(prefTags));
         this.ingredients.set([]);
-        const save$ = this.firebase.saveRecipes(recipes).catch(err => {
+        const recipesWithPersons = recipes.map(r => ({ ...r, persons: preferences.persons }));
+        const save$ = this.firebase.saveRecipes(recipesWithPersons).catch(err => {
           this.logger.log(`Failed to save recipes to Firestore: ${err}`);
           return recipes;
         });
@@ -113,6 +114,7 @@ export class RecipeService {
     );
   }
 }
+
 
 /** Formats stored ingredients into a human-readable string for the AI prompt. */
 function formatIngredients(ingredients: StoredIngredient[]): string {

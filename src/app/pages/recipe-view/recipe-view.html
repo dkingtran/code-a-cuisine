@@ -19,7 +19,7 @@
           @if (preferencesService.generationPersons() > 0) {
             <div class="cooking-persons display-row display-ai-center gap-16">
               <span class="cooking-persons-label">Cooking {{ preferencesService.generationPersons() === 1 ? 'Person' : 'Persons' }}: {{ preferencesService.generationPersons() }}</span>
-              <div class="display-row gap-4 flex-wrap">
+              <div class="display-row gap-4">
                 @for (chef of allChefs; track chef; let i = $index) {
                   @if (i < preferencesService.generationPersons()) {
                     <span class="chef-tag" [style.background-color]="chefConfig[chef].bgColor">
@@ -118,14 +118,14 @@
         </div>
 
         @if (!directionsCollapsed()) {
-        @if (directionPairs(); as pairs) {
+        @if (directionRows(); as rows) {
           <!-- Multi-chef grid -->
-          <div class="directions-grid">
-            @for (pair of pairs; track $index; let pairIndex = $index) {
-              @for (direction of pair; track $index; let colIndex = $index) {
+          <div class="directions-grid directions-grid--multi">
+            @for (row of rows; track $index) {
+              @for (direction of row.pair; track $index; let colIndex = $index) {
                 <div class="direction-item">
                   <div class="direction-header">
-                    <span class="direction-step">{{ pairIndex * preferencesService.generationPersons() + colIndex + 1 }}.</span>
+                    <span class="direction-step">{{ row.stepStart + colIndex }}.</span>
                     <h4>{{ direction.title }}</h4>
                     <span class="chef-tag" [style.background-color]="chefConfig[allChefs[colIndex]].bgColor">
                       <app-svg-icon [name]="allChefs[colIndex]"

@@ -54,6 +54,11 @@ export class GenerateRecipeComponent implements OnInit, OnDestroy {
   editingIngredient = signal<number | null>(null);
   editingDropdownOpen = signal<number | null>(null);
 
+  readonly duplicateIngredients = computed(() => {
+    const names = this.ingredients().map(i => i.name.trim().toLowerCase());
+    return [...new Set(names.filter((n, i) => names.indexOf(n) !== i))];
+  });
+
   readonly containerPaddingBottom = computed(() => {
     const base = 'clamp(16px, 2.5vw, 25px)';
     const dropdownExtra = this.dropdownOpen() ? 108 : 0;
@@ -103,6 +108,21 @@ export class GenerateRecipeComponent implements OnInit, OnDestroy {
     this.servingAmount.set('');
     this.suggestions.set([]);
     this.suggestionsOpen.set(false);
+  }
+
+  /** Removes the last duplicate ingredient with the given name from the list. */
+  removeDuplicate(name: string): void {
+    const list = this.ingredients();
+    const lastIndex = [...list].reverse().findIndex(i => i.name.trim().toLowerCase() === name);
+    const id = list[list.length - 1 - lastIndex].id;
+    this.removeIngredient(id);
+  }
+
+  /** Removes the last occurrence of each duplicate ingredient from the list. */
+  removeAllDuplicates(): void {
+    for (const name of this.duplicateIngredients()) {
+      this.removeDuplicate(name);
+    }
   }
 
   /** Removes an ingredient from the list by its ID. */

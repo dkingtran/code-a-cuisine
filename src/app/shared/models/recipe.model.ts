@@ -20,6 +20,7 @@ export interface Recipe {
     directions: RecipeDirection[];
     cuisine: string;
     time: number;
+    persons?: number;
     imageUrl?: string;
     tags?: string[];
     likes?: number;
