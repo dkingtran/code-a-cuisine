@@ -4,10 +4,10 @@
     </a>
     @if (backConfig()) {
         <div class="back-btn">
-            <a class="action-back-btn" [routerLink]="backConfig()!.route">
+            <button class="action-back-btn" type="button" [attr.aria-label]="backConfig()!.label" (click)="goBack()">
                 <app-svg-icon name="back-btn-green" [width]="22" [height]="15"></app-svg-icon>
-                <p>{{ backConfig()!.label }}</p>
-            </a>
+                <p aria-hidden="true">{{ backConfig()!.label }}</p>
+            </button>
         </div>
     }
 </div>

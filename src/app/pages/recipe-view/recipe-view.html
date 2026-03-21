@@ -19,7 +19,7 @@
           @if (preferencesService.generationPersons() > 0) {
             <div class="cooking-persons display-row display-ai-center gap-16">
               <span class="cooking-persons-label">Cooking {{ preferencesService.generationPersons() === 1 ? 'Person' : 'Persons' }}: {{ preferencesService.generationPersons() }}</span>
-              <div class="display-row gap-4">
+              <div class="display-row gap-4 flex-wrap">
                 @for (chef of allChefs; track chef; let i = $index) {
                   @if (i < preferencesService.generationPersons()) {
                     <span class="chef-tag" [style.background-color]="chefConfig[chef].bgColor">
