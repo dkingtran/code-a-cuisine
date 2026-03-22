@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -112,
-        768
+        384,
+        928
       ],
-      "id": "d6d1b98f-b54c-4816-ac1a-247e1ddf7848",
+      "id": "0b3e11d9-34b9-4c9f-886f-463f393a8e79",
       "name": "Webhook",
       "webhookId": "YOUR_WEBHOOK_PATH"
     },
@@ -25,10 +25,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        112,
-        768
+        624,
+        1056
       ],
-      "id": "e8fbb922-d114-4c5c-ae5d-6212a09257c3",
+      "id": "d6c55ce2-70ec-4636-8c66-07083376f1f9",
       "name": "Check Global Quota"
     },
     {
@@ -58,10 +58,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        336,
-        768
+        832,
+        1056
       ],
-      "id": "d4628908-feab-4f51-8984-7d010b782abd",
+      "id": "e61ec1dd-905b-435d-a293-2b42058db59a",
       "name": "Quota OK?"
     },
     {
@@ -73,10 +73,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        336,
-        1040
+        1072,
+        1104
       ],
-      "id": "276a6591-85be-499b-8f88-e429d5b7a3a7",
+      "id": "cf5c28eb-5cc6-4754-bc4b-60c730de639d",
       "name": "Respond - Quota Exceeded"
     },
     {
@@ -107,10 +107,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        560,
-        768
+        1072,
+        912
       ],
-      "id": "d2290062-4fff-4397-8624-935794968a45",
+      "id": "fcd3d438-4e51-486d-9d27-a7c8c2a5205d",
       "name": "Validate Input"
     },
     {
@@ -122,10 +122,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1552,
-        640
+        2096,
+        816
       ],
-      "id": "6235472e-ea58-45a2-b0ef-7915e655ee0f",
+      "id": "7876bb9b-5992-42ea-9727-0f5706f4b0e5",
       "name": "Respond to Webhook"
     },
     {
@@ -139,10 +139,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        768,
-        976
+        1280,
+        1008
       ],
-      "id": "4584ec88-ce55-4be8-bd3b-6708b86a4629",
+      "id": "abe33c45-4f27-4b4a-ba68-713cc94f0c06",
       "name": "Respond - Invalid Input"
     },
     {
@@ -150,10 +150,10 @@
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
       "position": [
-        1248,
-        1120
+        1760,
+        1280
       ],
-      "id": "39c140b8-0f2d-45e6-9072-4df35268b8ce",
+      "id": "0217dbc0-8f5f-4ac8-9ba4-b6c3e47b12ed",
       "name": "Error Handler"
     },
     {
@@ -167,10 +167,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1472,
-        1120
+        1984,
+        1280
       ],
-      "id": "aa972642-ef52-41d8-84cc-71d5dcff5b46",
+      "id": "f9d5635a-86ef-4560-b8f8-09c0d49ca756",
       "name": "Respond - Workflow Error"
     },
     {
@@ -182,11 +182,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        192,
-        448
+        592,
+        688
       ],
       "typeVersion": 1,
-      "id": "add791dd-9d4c-4b82-b8a8-43cf54b09802",
+      "id": "28c17e34-50f4-40bd-bb43-1789f4de421b",
       "name": "Sticky Note"
     },
     {
@@ -198,11 +198,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        192,
-        672
+        592,
+        960
       ],
       "typeVersion": 1,
-      "id": "e059b524-6763-4395-b6a7-1571624d5d97",
+      "id": "4c679245-e6f0-4883-be7c-4e5bc961a1af",
       "name": "Sticky Note1"
     },
     {
@@ -212,10 +212,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        112,
-        544
+        624,
+        784
       ],
-      "id": "dae9e0db-6b5e-4a3c-807e-469b9953f693",
+      "id": "ae7679d6-5706-41b7-bb8b-9391941dc612",
       "name": "Check Global Quota Test"
     },
     {
@@ -245,10 +245,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        336,
-        544
+        832,
+        784
       ],
-      "id": "96c6aa25-d9e3-4a38-b167-63ee616b23c3",
+      "id": "f85177cd-46aa-412e-a61c-7b5da572b8c6",
       "name": "Quota OK? Test"
     },
     {
@@ -298,11 +298,11 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        768,
-        768
+        1280,
+        816
       ],
-      "id": "5c13475a-7465-4c20-8dd3-439e0a10bf89",
-      "name": "Edit Fields"
+      "id": "7d96db47-f063-4df0-a20b-fd139b70e6bf",
+      "name": "Extract Request Fields"
     },
     {
       "parameters": {
@@ -311,11 +311,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        992,
-        768
+        1488,
+        816
       ],
-      "id": "f924c90a-5978-48d1-abfd-b0ea0ba93f7c",
-      "name": "Code in JavaScript"
+      "id": "dd5d2e80-5a2c-4879-b893-a26e9853335a",
+      "name": "Prompt"
     },
     {
       "parameters": {
@@ -326,10 +326,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        1248,
-        640
+        1760,
+        816
       ],
-      "id": "b400e351-64b7-43f8-9857-79db1630ddf0",
+      "id": "1d9cc98a-7c26-416b-ab39-79d5ffa2ade0",
       "name": "Basic LLM Chain"
     },
     {
@@ -339,10 +339,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        1184,
-        848
+        1696,
+        1008
       ],
-      "id": "07ee6b07-2fd0-446a-9a8f-8bea328635e3",
+      "id": "8a7555e7-4197-43f8-a8c5-a1a610a9aa4d",
       "name": "Google Gemini Chat Model1",
       "credentials": {
         "googlePalmApi": {
@@ -398,7 +398,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "Extract Request Fields",
             "type": "main",
             "index": 0
           }
@@ -452,18 +452,18 @@
         ]
       ]
     },
-    "Edit Fields": {
+    "Extract Request Fields": {
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "Prompt",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code in JavaScript": {
+    "Prompt": {
       "main": [
         [
           {
@@ -500,11 +500,7 @@
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "timeSavedMode": "fixed",
-    "timezone": "Europe/Berlin",
-    "callerPolicy": "workflowsFromSameOwner",
-    "availableInMCP": false,
-    "errorWorkflow": "YOUR_ERROR_WORKFLOW_ID"
+    "binaryMode": "separate"
   },
   "versionId": "YOUR_VERSION_ID",
   "meta": {

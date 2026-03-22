@@ -170,9 +170,10 @@ export class GenerateRecipeComponent implements OnInit, OnDestroy {
   private sanitizeIngredientInput(event: Event): string {
     const input = event.target as HTMLInputElement;
     const filtered = input.value.replace(/[^a-zA-ZäöüÄÖÜß\s]/g, '');
-    input.value = filtered;
-    this.ingredientName.set(filtered);
-    return filtered;
+    const capitalized = filtered.charAt(0).toUpperCase() + filtered.slice(1);
+    input.value = capitalized;
+    this.ingredientName.set(capitalized);
+    return capitalized;
   }
 
   /** Shows local fallback suggestions filtered by the search term. */
@@ -221,7 +222,8 @@ export class GenerateRecipeComponent implements OnInit, OnDestroy {
 
   /** Fills the ingredient name input with the selected suggestion. */
   selectSuggestion(name: string): void {
-    this.ingredientName.set(name);
+    const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
+    this.ingredientName.set(capitalized);
     this.suggestions.set([]);
     this.suggestionsOpen.set(false);
   }
