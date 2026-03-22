@@ -5,11 +5,8 @@ import { FirebaseService } from './firebase.service';
 export class QuotaService {
     private readonly firebase = inject(FirebaseService);
 
-    /** Maximum recipe generations allowed system-wide per day. */
-    readonly GLOBAL_LIMIT = 12;
-
     /** Maximum recipe generations allowed per IP per day. */
-    readonly IP_LIMIT = 3;
+    readonly GLOBAL_LIMIT = 12;
 
     readonly globalUsed = signal(0);
     readonly isLoading = signal(true);

@@ -30,6 +30,7 @@ export interface RecipeDocument extends Recipe {
 export class FirebaseService {
     private readonly app: FirebaseApp;
     private readonly db: Firestore;
+    private cachedIp: string | null = null;
 
     constructor() {
         this.app = getApps().length ? getApps()[0] : initializeApp(environment.firebase);
@@ -41,31 +42,43 @@ export class FirebaseService {
      * Skips recipes whose title already exists to prevent duplicates.
      */
     async saveRecipes(recipes: Recipe[]): Promise<Recipe[]> {
+        const clientIp = await this.getClientIp();
         const col = collection(this.db, 'recipes');
-        return Promise.all(recipes.map(recipe => this.saveIfNotDuplicate(col, recipe)));
+        return Promise.all(recipes.map(recipe => this.saveIfNotDuplicate(col, recipe, clientIp)));
     }
 
-    private async saveIfNotDuplicate(col: ReturnType<typeof collection>, recipe: Recipe): Promise<Recipe> {
+    private async saveIfNotDuplicate(col: ReturnType<typeof collection>, recipe: Recipe, clientIp: string): Promise<Recipe> {
         const q = query(col, where('title', '==', recipe.title));
         const existing = await getDocs(q);
-        if (!existing.empty) {
-            return { ...recipe, id: existing.docs[0].id };
-        }
-        const docRef = await addDoc(col, { ...recipe, createdAt: Timestamp.now() });
+        if (!existing.empty) return { ...recipe, id: existing.docs[0].id };
+        const docRef = await addDoc(col, { ...recipe, clientIp, createdAt: Timestamp.now() });
         return { ...recipe, id: docRef.id };
     }
 
-    /**
-     * Returns the total number of recipes generated today (since midnight local time).
-     * Used to enforce and display the global daily quota of 12 recipes.
-     */
     async getTodayRecipeCount(): Promise<number> {
+        const clientIp = await this.getClientIp();
         const col = collection(this.db, 'recipes');
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
-        const q = query(col, where('createdAt', '>=', Timestamp.fromDate(todayStart)));
+        const todayTs = Timestamp.fromDate(todayStart);
+        const q = query(col, where('clientIp', '==', clientIp));
         const snapshot = await getDocs(q);
-        return snapshot.size;
+        return snapshot.docs.filter(d => {
+            const ts = d.data()['createdAt'] as Timestamp | undefined;
+            return ts != null && ts.seconds >= todayTs.seconds;
+        }).length;
+    }
+
+    async getClientIp(): Promise<string> {
+        if (this.cachedIp) return this.cachedIp;
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json() as { ip: string };
+            this.cachedIp = data.ip;
+        } catch {
+            this.cachedIp = 'unknown';
+        }
+        return this.cachedIp!;
     }
 
     /**
