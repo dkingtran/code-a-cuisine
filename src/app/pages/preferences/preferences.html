@@ -155,3 +155,48 @@
     </div>
   </div>
 }
+
+@if (showDietWarningModal().length > 0) {
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    (click)="closeDietWarning()"
+    (keydown.escape)="closeDietWarning()"
+  >
+    <div
+      #dietWarnBox
+      class="modal-box display-column"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="diet-warning-title"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-close-row">
+        <button type="button" class="modal-close-btn" (click)="closeDietWarning()" aria-label="Close">
+          <app-svg-icon name="close-creme" size="14"></app-svg-icon>
+        </button>
+      </div>
+      <div class="modal-body display-column gap-16">
+        <h1 id="diet-warning-title">Heads up! <span class="h1-break">Ingredient mismatch</span></h1>
+        <p>These ingredients may not be compatible with <strong>{{ selectedDiet() }}</strong>:</p>
+        <ul class="modal-ingredient-list" aria-label="Incompatible ingredients">
+          @for (name of showDietWarningModal(); track name) {
+            <li>{{ name }}</li>
+          }
+        </ul>
+        <p>Go back to edit your ingredients, or generate anyway.</p>
+        <div class="modal-actions display-column gap-4">
+          <button type="button" class="action-arrow-btn" (click)="goBackFromDietWarning()">
+            Edit Ingredients
+            <app-svg-icon name="forward-btn-creme" [width]="22" [height]="15"></app-svg-icon>
+          </button>
+          <button type="button" class="action-arrow-btn action-arrow-btn--muted" (click)="proceedDespiteWarning()">
+            Generate Anyway
+            <app-svg-icon name="forward-btn-creme" [width]="22" [height]="15"></app-svg-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

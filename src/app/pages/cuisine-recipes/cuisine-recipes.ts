@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject, computed, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../../shared/services/firebase.service';
@@ -16,7 +16,7 @@ const TIME_TAGS = new Set(['Quick', 'Medium', 'Complex']);
   styleUrl: 'cuisine-recipes.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CuisineRecipesComponent {
+export class CuisineRecipesComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private firebaseService = inject(FirebaseService);
@@ -51,11 +51,42 @@ export class CuisineRecipesComponent {
   desktopBannerUrl = computed(() => `/assets/img/recipes/banner-${this.cuisineType()}.png`);
   mobileBannerUrl = computed(() => `/assets/img/recipes/mobile/mobile-${this.cuisineType()}.png`);
 
+  // Adjust per-cuisine title vertical position (% from top of banner image).
+  // 50 = centered. Lower = higher up, higher = further down.
+  private readonly titleOffsets: Record<string, number> = {
+    italian: 50,
+    german: 45,
+    japanese: 45,
+    gourmet: 58,
+    indian: 50,
+    fusion: 46,
+  };
+
+  // Separate offsets for mobile banner (<480px).
+  private readonly titleOffsetsMobile: Record<string, number> = {
+    italian: 50,
+    german: 48,
+    japanese: 50,
+    gourmet: 50,
+    indian: 50,
+    fusion: 50,
+  };
+
+  private readonly isMobile = signal(window.innerWidth < 480);
+  private readonly onResize = () => this.isMobile.set(window.innerWidth < 480);
+
+  readonly titleStyle = computed(() => {
+    const map = this.isMobile() ? this.titleOffsetsMobile : this.titleOffsets;
+    const offset = map[this.cuisineType()] ?? 50;
+    return { top: `${offset}%` };
+  });
+
   /**
    * Reads the cuisine type from the URL, then loads all matching recipes
    * from Firestore sorted by likes descending.
    */
   async ngOnInit() {
+    window.addEventListener('resize', this.onResize);
     const type = this.route.snapshot.paramMap.get('type');
     if (type) {
       this.cuisineType.set(type);
@@ -76,6 +107,10 @@ export class CuisineRecipesComponent {
    * Returns the recipe's tags sorted: diet tags first, then time tags, then the rest.
    * @param recipe The recipe whose tags should be sorted.
    */
+  ngOnDestroy(): void {
+    window.removeEventListener('resize', this.onResize);
+  }
+
   sortedTagsFor(recipe: Recipe): string[] {
     const tags = recipe.tags ?? [];
     const diet = tags.filter(t => DIET_TAGS.has(t));

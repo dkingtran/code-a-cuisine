@@ -15,7 +15,7 @@
     <div class="banner-img banner-img--mobile">
       <img [src]="mobileBannerUrl()" [alt]="cuisineName() + ' banner'" />
     </div>
-    <h2 class="cuisine-banner__title">{{ cuisineName() }}</h2>
+    <h2 class="cuisine-banner__title" [style.top]="titleStyle().top">{{ cuisineName() }}</h2>
   </div>
 
   <!-- 3. Recipe list -->

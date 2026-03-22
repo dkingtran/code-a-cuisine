@@ -275,3 +275,38 @@ select {
         font-size: clamp(1rem, 1.5vw, 1.25rem);
     }
 }
+
+// ── Diet Warning Modal ───────────────────────────────────────────────────────
+.modal-ingredient-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    li {
+        color: #FAF0E6;
+        font-family: 'mulish', sans-serif;
+        font-size: clamp(16px, 2vw, 18px);
+        font-weight: 600;
+        padding-left: 18px;
+        position: relative;
+
+        &::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+        }
+    }
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+}
+
+.action-arrow-btn--muted {
+    opacity: 0.6;
+    font-size: clamp(0.875rem, 1.25vw, 1rem);
+}

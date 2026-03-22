@@ -1,10 +1,37 @@
 import { Component, ChangeDetectionStrategy, computed, inject, signal, ElementRef, viewChild, Injector, afterNextRender, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
-import { RecipeService } from '../../shared/services/recipe.service';
+import { RecipeService, StoredIngredient } from '../../shared/services/recipe.service';
 import { LoadingService } from '../../core/services/loading.service';
 import { PreferencesService } from '../../core/services/preferences.service';
 import { QuotaService } from '../../shared/services/quota.service';
+
+const KETO_INCOMPATIBLE = [
+  'rice', 'pasta', 'noodle', 'bread', 'flour', 'sugar', 'potato', 'oats',
+  'beans', 'lentils', 'chickpeas', 'corn', 'wheat', 'barley', 'banana',
+  'apple', 'orange', 'grape', 'mango', 'cereal', 'cracker', 'tortilla',
+];
+const VEGETARIAN_INCOMPATIBLE = [
+  'chicken', 'beef', 'pork', 'lamb', 'salmon', 'tuna', 'shrimp', 'fish',
+  'turkey', 'duck', 'bacon', 'ham', 'sausage', 'prawn', 'crab', 'lobster',
+  'anchovy', 'sardine', 'trout', 'cod', 'tilapia', 'veal', 'venison',
+];
+const VEGAN_INCOMPATIBLE = [
+  ...VEGETARIAN_INCOMPATIBLE,
+  'butter', 'milk', 'cream', 'cheese', 'egg', 'yogurt', 'honey',
+  'mayonnaise', 'ghee', 'lard', 'gelatin', 'whey',
+];
+
+function getIncompatibleIngredients(ingredients: StoredIngredient[], diet: string | null): string[] {
+  const kw = diet === 'Keto' ? KETO_INCOMPATIBLE
+    : diet === 'Vegetarian' ? VEGETARIAN_INCOMPATIBLE
+      : diet === 'Vegan' ? VEGAN_INCOMPATIBLE
+        : null;
+  if (!kw) return [];
+  return ingredients
+    .filter(i => kw.some(k => i.name.toLowerCase().includes(k)))
+    .map(i => i.name);
+}
 
 @Component({
   selector: 'app-preferences',
@@ -23,9 +50,11 @@ export class PreferencesComponent implements OnInit {
 
   readonly modalBoxRef = viewChild<ElementRef<HTMLElement>>('modalBox');
   readonly quotaBoxRef = viewChild<ElementRef<HTMLElement>>('quotaBox');
+  readonly dietWarnBoxRef = viewChild<ElementRef<HTMLElement>>('dietWarnBox');
 
   readonly showInsufficientModal = signal(false);
   readonly showQuotaModal = signal<'ip' | 'global' | null>(null);
+  readonly showDietWarningModal = signal<string[]>([]);
 
   readonly globalRemaining = this.quotaService.globalRemaining;
   readonly isQuotaLoading = this.quotaService.isLoading;
@@ -97,21 +126,50 @@ export class PreferencesComponent implements OnInit {
     this.selectedDiet.update(v => v === diet ? null : diet);
   }
 
-  /**
-   * Triggers recipe generation via the n8n AI workflow.
-   * Checks quota before sending, shows appropriate modal on error.
-   */
   generateRecipe(): void {
     if (this.quotaService.isGlobalExhausted()) {
       this.openQuotaModal('global');
       return;
     }
+    const incompatible = getIncompatibleIngredients(
+      this.recipeService.ingredients(),
+      this.selectedDiet()
+    );
+    if (incompatible.length > 0) {
+      this.openDietWarningModal(incompatible);
+      return;
+    }
+    this.startGeneration();
+  }
+
+  private startGeneration(): void {
     this.loadingService.show();
     this.preferencesService.setPersons(this.persons());
     this.recipeService.generateRecipe(this.buildPreferences()).subscribe({
       next: () => this.handleGenerateSuccess(),
       error: (err: unknown) => this.handleGenerateError(err),
     });
+  }
+
+  private openDietWarningModal(ingredients: string[]): void {
+    this.showDietWarningModal.set(ingredients);
+    document.body.style.overflow = 'hidden';
+    afterNextRender(() => this.dietWarnBoxRef()?.nativeElement.focus(), { injector: this.injector });
+  }
+
+  closeDietWarning(): void {
+    this.showDietWarningModal.set([]);
+    document.body.style.overflow = '';
+  }
+
+  proceedDespiteWarning(): void {
+    this.closeDietWarning();
+    this.startGeneration();
+  }
+
+  goBackFromDietWarning(): void {
+    this.closeDietWarning();
+    void this.router.navigate(['/generate']);
   }
 
   /** Builds the preferences object from the current signal values. */
