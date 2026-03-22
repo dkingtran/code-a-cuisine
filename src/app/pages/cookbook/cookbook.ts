@@ -5,6 +5,7 @@ import { Cuisine, Recipe } from '../../shared/models/recipe.model';
 import { SvgIconComponent } from '../../shared/components/svg-icon/svg-icon';
 import { RecipeCardComponent } from '../../shared/components/recipe-card/recipe-card';
 import { FirebaseService } from '../../shared/services/firebase.service';
+import { CookbookFilterService } from './cookbook-filter.service';
 
 @Component({
   selector: 'app-cookbook',
@@ -16,6 +17,7 @@ import { FirebaseService } from '../../shared/services/firebase.service';
 export class CookbookComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly firebaseService = inject(FirebaseService);
+  private readonly filterService = inject(CookbookFilterService);
 
   readonly allRecipesCollapsed = signal(false);
   toggleAllRecipes(): void { this.allRecipesCollapsed.update(v => !v); }
@@ -122,16 +124,16 @@ export class CookbookComponent implements OnInit {
   recipes = signal<Recipe[]>([]);
 
   /** Active cuisine filter value, or null for no filter. */
-  readonly selectedCuisineFilter = signal<string | null>(null);
+  readonly selectedCuisineFilter = this.filterService.selectedCuisineFilter;
 
   /** Active diet filter value, or null for no filter. */
-  readonly selectedDietFilter = signal<string | null>(null);
+  readonly selectedDietFilter = this.filterService.selectedDietFilter;
 
   /** Active time filter value, or null for no filter. */
-  readonly selectedTimeFilter = signal<'quick' | 'medium' | 'complex' | null>(null);
+  readonly selectedTimeFilter = this.filterService.selectedTimeFilter;
 
   /** Whether the filtered recipes are sorted by likes descending. */
-  readonly sortByLikes = signal(false);
+  readonly sortByLikes = this.filterService.sortByLikes;
 
   /** Recipes filtered by the currently active cuisine, diet and time filters. */
   readonly filteredRecipes = computed(() => {
@@ -149,24 +151,16 @@ export class CookbookComponent implements OnInit {
   });
 
   /** Toggles the most-liked sort — deselects if already active. */
-  toggleSortByLikes(): void {
-    this.sortByLikes.update(v => !v);
-  }
+  toggleSortByLikes(): void { this.filterService.toggleSortByLikes(); }
 
   /** Toggles the cuisine filter — deselects if already active. */
-  setCuisineFilter(value: string): void {
-    this.selectedCuisineFilter.set(this.selectedCuisineFilter() === value ? null : value);
-  }
+  setCuisineFilter(value: string): void { this.filterService.setCuisineFilter(value); }
 
   /** Toggles the diet filter — deselects if already active. */
-  setDietFilter(value: string): void {
-    this.selectedDietFilter.set(this.selectedDietFilter() === value ? null : value);
-  }
+  setDietFilter(value: string): void { this.filterService.setDietFilter(value); }
 
   /** Toggles the time filter — deselects if already active. */
-  setTimeFilter(value: 'quick' | 'medium' | 'complex'): void {
-    this.selectedTimeFilter.set(this.selectedTimeFilter() === value ? null : value);
-  }
+  setTimeFilter(value: 'quick' | 'medium' | 'complex'): void { this.filterService.setTimeFilter(value); }
 
   /**
    * Navigates to the cuisine-specific recipe list.
