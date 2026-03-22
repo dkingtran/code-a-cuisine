@@ -143,7 +143,7 @@
       <div class="modal-body display-column gap-24">
         <h1 id="quota-modal-title">Daily limit <span class="h1-break">reached!</span></h1>
         @if (showQuotaModal() === 'ip') {
-          <p>You've used all {{ IP_LIMIT }} of your daily recipe generations. Come back tomorrow for fresh recipe ideas!</p>
+          <p>You've used all {{ GLOBAL_LIMIT }} of your daily recipe generations. Come back tomorrow for fresh recipe ideas!</p>
         } @else {
           <p>The daily limit of {{ GLOBAL_LIMIT }} recipe generations has been reached. Come back tomorrow!</p>
         }

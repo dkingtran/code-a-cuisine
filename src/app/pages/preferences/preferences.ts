@@ -59,7 +59,6 @@ export class PreferencesComponent implements OnInit {
   readonly globalRemaining = this.quotaService.globalRemaining;
   readonly isQuotaLoading = this.quotaService.isLoading;
   readonly GLOBAL_LIMIT = this.quotaService.GLOBAL_LIMIT;
-  readonly IP_LIMIT = this.quotaService.IP_LIMIT;
 
   readonly portions = this.preferencesService.portions;
   readonly portionsShake = signal(false);
